@@ -1,0 +1,35 @@
+CREATE COMPUTE MODULE Inward_XML_USPContainer_Process_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		SET Environment.variables.ediStartTime = CURRENT_TIMESTAMP;
+		DECLARE ReplaceCarriageReturn BLOB X'0d0a';
+		DECLARE InBLOB_CRLF BLOB;
+		DECLARE XMLBLOB BLOB;
+		
+		SET Environment.Variables.InBlob = InputRoot.BLOB.BLOB;
+		SET Environment.variables.filename = InputLocalEnvironment.File.Name;
+		SET InBLOB_CRLF = Environment.Variables.InBlob;
+
+		SET Environment.Variables.charData = CAST(InBLOB_CRLF AS CHARACTER CCSID 1208);
+		
+          IF EXISTS(Environment.MQ[]) THEN		
+			SET Environment.Variables.InXML = Environment.Variables.charData;
+		ELSE
+			SET Environment.Variables.InXML = SUBSTRING(Environment.Variables.charData AFTER '?>');
+		END IF;
+		
+		DECLARE charPosCommonRefStart INTEGER POSITION('<CommonRefNumber>' IN Environment.Variables.InXML);
+		DECLARE charPosCommonRefEnd INTEGER POSITION('</CommonRefNumber>' IN Environment.Variables.InXML);
+		DECLARE commonRefLength INTEGER charPosCommonRefEnd - charPosCommonRefStart;
+		SET Environment.Variables.msRefNo = SUBSTRING(Environment.Variables.InXML FROM charPosCommonRefStart+17 FOR commonRefLength);
+		SET Environment.Variables.msRefNo = SUBSTRING(Environment.Variables.msRefNo BEFORE '<');	
+		
+		DECLARE charPosSenderIdStart INTEGER POSITION('<SenderID>' IN Environment.Variables.InXML);
+		DECLARE charPosSenderIdEnd INTEGER POSITION('</SenderID>' IN Environment.Variables.InXML);
+		DECLARE senderIdLength INTEGER charPosSenderIdEnd - charPosSenderIdStart;
+		SET Environment.Variables.msgSender = SUBSTRING(Environment.Variables.InXML FROM charPosSenderIdStart+10 FOR senderIdLength);
+		SET Environment.Variables.msgSender = SUBSTRING(Environment.Variables.msgSender BEFORE '<');
+	
+      RETURN TRUE;
+	END;	
+END MODULE;

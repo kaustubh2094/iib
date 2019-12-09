@@ -1,0 +1,22 @@
+BROKER SCHEMA INBOUND
+
+
+CREATE COMPUTE MODULE CNFCNP_XML_API
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+				DECLARE blobdata BLOB;
+		IF FIELDNAME(InputRoot.XMLNSC.(XMLNSC.Element)[1]) IS NOT NULL THEN
+			SET blobdata = ASBITSTREAM(InputRoot.XMLNSC.cnfcnp.payload);
+			SET OutputRoot.BLOB.BLOB = blobdata;
+			SET Environment.MQ = InputRoot.MQMD;
+			SET Environment.variables.APICall = TRUE;
+			SET Environment.variables.channelId = InputRoot.XMLNSC.cnfcnp.channelId;
+			SET Environment.variables.requestId = InputRoot.XMLNSC.cnfcnp.requestId;
+			SET Environment.variables.serviceId = InputRoot.XMLNSC.cnfcnp.serviceId;
+		ELSE
+			SET Environment.variables.APICall = FALSE;
+			SET OutputRoot.BLOB.BLOB = InputRoot.BLOB.BLOB;
+		END IF;
+		RETURN TRUE;
+	END;
+END MODULE;

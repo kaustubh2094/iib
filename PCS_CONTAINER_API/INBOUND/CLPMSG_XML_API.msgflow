@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:AuditLoggingContainer_Process.subflow="AuditLoggingContainer_Process.subflow" xmlns:ComIbmCompute.msgnode="ComIbmCompute.msgnode" xmlns:ComIbmMQInput.msgnode="ComIbmMQInput.msgnode" xmlns:ComIbmMQOutput.msgnode="ComIbmMQOutput.msgnode" xmlns:ErrorHandlingContainer_Process.subflow="ErrorHandlingContainer_Process.subflow" xmlns:Inward_XML_USPContainer_Process.subflow="Inward_XML_USPContainer_Process.subflow" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:eflow="http://www.ibm.com/wbi/2005/eflow" xmlns:utility="http://www.ibm.com/wbi/2005/eflow_utility" nsURI="INBOUND/CLPMSG_XML_API.msgflow" nsPrefix="INBOUND_CLPMSG_XML_API.msgflow">
+  <eClassifiers xmi:type="eflow:FCMComposite" name="FCMComposite_1">
+    <eSuperTypes href="http://www.ibm.com/wbi/2005/eflow#//FCMBlock"/>
+    <translation xmi:type="utility:TranslatableString" key="CLPMSG_XML_API" bundleName="INBOUND/CLPMSG_XML_API" pluginId="PCS_CONTAINER_API"/>
+    <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/PCS_CONTAINER_API/icons/full/obj16/CLPMSG_XML_API.gif"/>
+    <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/PCS_CONTAINER_API/icons/full/obj30/CLPMSG_XML_API.gif"/>
+    <composition>
+      <nodes xmi:type="ComIbmMQInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_1" location="9,153" queueName="CLPMSG.API.IN" destinationQueueManagerName="PCSESB1QMG1" messageDomainProperty="XMLNSC">
+        <translation xmi:type="utility:ConstantString" string="CLPMSG.API.IN"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_2" location="96,152" computeExpression="esql://routine/INBOUND#CLPMSG_XML_API_inputData_Compute.Main">
+        <translation xmi:type="utility:ConstantString" string="inputData"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_4" location="217,101" dataSource="PCSDSN" transaction="commit" computeExpression="esql://routine/INBOUND#CLPMSG_XML_API_processFile_Compute.Main" computeMode="all">
+        <translation xmi:type="utility:ConstantString" string="processFile"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_5" location="300,17" dataSource="PCSDSN" computeExpression="esql://routine/INBOUND#CLPMSG_XML_API_failure_Compute.Main">
+        <translation xmi:type="utility:ConstantString" string="failure"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_6" location="369,149" dataSource="PCSDSN" computeExpression="esql://routine/INBOUND#CLPMSG_XML_API_mailSMSCall_Compute.Main">
+        <translation xmi:type="utility:ConstantString" string="mailSMSCall"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_7" location="462,150" dataSource="PCSDSN" computeExpression="esql://routine/INBOUND#CLPMSG_XML_API_auditDetails_Compute.Main">
+        <translation xmi:type="utility:ConstantString" string="auditDetails"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMQOutput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_10" location="274,149" queueName="CLPMSG_REQ_Q" destinationQueueManagerName="PCSESB1QMG1">
+        <translation xmi:type="utility:ConstantString" string="CLPMSG_REQ_Q"/>
+      </nodes>
+      <nodes xmi:type="AuditLoggingContainer_Process.subflow:FCMComposite_1" xmi:id="FCMComposite_1_3" location="470,228">
+        <translation xmi:type="utility:ConstantString" string="AuditLoggingContainer_Process"/>
+      </nodes>
+      <nodes xmi:type="ErrorHandlingContainer_Process.subflow:FCMComposite_1" xmi:id="FCMComposite_1_8" location="381,16">
+        <translation xmi:type="utility:ConstantString" string="ErrorHandlingContainer_Process"/>
+      </nodes>
+      <nodes xmi:type="Inward_XML_USPContainer_Process.subflow:FCMComposite_1" xmi:id="FCMComposite_1_9" location="84,223">
+        <translation xmi:type="utility:ConstantString" string="Inward_XML_USPContainer_Process"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_11" location="548,96" computeExpression="esql://routine/INBOUND#CLPMSG_XML_API_ackRequest_Compute.Main">
+        <translation xmi:type="utility:ConstantString" string="ackRequest"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMQOutput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_12" location="617,97" queueName="ACKAPI.IN" destinationQueueManagerName="PCSESB1QMG1">
+        <translation xmi:type="utility:ConstantString" string="ACKAPI.IN"/>
+      </nodes>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_1" targetNode="FCMComposite_1_2" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_4" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.failure" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_5" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.catch" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_7" targetNode="FCMComposite_1_7" sourceNode="FCMComposite_1_6" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_10" targetNode="FCMComposite_1_6" sourceNode="FCMComposite_1_10" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_6" targetNode="FCMComposite_1_10" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.out2" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_2" targetNode="FCMComposite_1_9" sourceNode="FCMComposite_1_2" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_3" targetNode="FCMComposite_1_4" sourceNode="FCMComposite_1_9" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_8" targetNode="FCMComposite_1_8" sourceNode="FCMComposite_1_5" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_9" targetNode="FCMComposite_1_3" sourceNode="FCMComposite_1_7" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_11" targetNode="FCMComposite_1_11" sourceNode="FCMComposite_1_3" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_12" targetNode="FCMComposite_1_12" sourceNode="FCMComposite_1_11" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_13" targetNode="FCMComposite_1_11" sourceNode="FCMComposite_1_8" sourceTerminalName="OutTerminal.Output1" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_14" targetNode="FCMComposite_1_11" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.out1" targetTerminalName="InTerminal.in"/>
+    </composition>
+    <propertyOrganizer/>
+    <stickyBoard/>
+  </eClassifiers>
+</ecore:EPackage>

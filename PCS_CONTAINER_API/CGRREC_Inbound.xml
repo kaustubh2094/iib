@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CartingReceiptRes>
+   <DocumentHeader>
+      <DocumentReference>
+         <DocumentType>CGRREC</DocumentType>
+         <DocumentName>Carting Receipt Response</DocumentName>
+         <DocumentNumber>2019050149780981</DocumentNumber>
+         <CommonRefNumber>2019050149780986</CommonRefNumber>
+         <MessageType>9</MessageType>
+         <SenderID>jwrlo001</SenderID>
+      </DocumentReference>
+      <DocumentExchangeDetails>
+         <ReceivingPartyDetails>
+            <ReceivingParty>CHA001</ReceivingParty>
+         </ReceivingPartyDetails>
+         <NotifyPartyDetails>
+            <NotifyParty>CHA001</NotifyParty>
+         </NotifyPartyDetails>
+      </DocumentExchangeDetails>
+   </DocumentHeader>
+   <DocumentDetails>
+      <CartingPermission>
+         <RecordType>N</RecordType>
+         <RequestType>P</RequestType>
+         <SBNo>343355</SBNo>
+         <SBDate>01052019</SBDate>
+         <CHACode>CODE</CHACode>
+         <IECode>CODE</IECode>
+         <TruckNumber>MH041234</TruckNumber>
+         <CartingUpToDate>01052019</CartingUpToDate>
+      </CartingPermission>
+      <CargoDetails>
+	  <RecordNumber>12345</RecordNumber>
+         <TypeOfCargo>TE</TypeOfCargo>
+         <DateOfCarting>01052019</DateOfCarting>
+      </CargoDetails>
+   </DocumentDetails>
+   <DocumentSummary>
+      <IssuedDateTime>03122018115101</IssuedDateTime>
+   </DocumentSummary>
+</CartingReceiptRes>

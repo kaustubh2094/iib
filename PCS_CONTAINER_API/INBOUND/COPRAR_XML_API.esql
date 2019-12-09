@@ -1,0 +1,214 @@
+BROKER SCHEMA INBOUND
+
+CREATE COMPUTE MODULE COPRAR_XML_API_inputData_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE blobdata BLOB ASBITSTREAM(InputRoot.XMLNSC.coprar.payload);
+		SET OutputRoot.BLOB.BLOB = blobdata;
+		SET Environment.MQ = InputRoot.MQMD;
+		SET Environment.variables.channelId = InputRoot.XMLNSC.coprar.channelId;
+		SET Environment.variables.requestId = InputRoot.XMLNSC.coprar.requestId;
+		SET Environment.variables.serviceId = InputRoot.XMLNSC.coprar.serviceId;
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE COPRAR_XML_API_processFile_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE InXML CHARACTER;
+		SET InXML = Environment.Variables.InXML;
+		
+		DECLARE charPosCommonRefStart INTEGER POSITION('<CommonRefNumber>' IN Environment.Variables.InXML);
+		DECLARE charPosCommonRefEnd INTEGER POSITION('</CommonRefNumber>' IN Environment.Variables.InXML);
+		DECLARE commonRefLength INTEGER charPosCommonRefEnd - charPosCommonRefStart;
+		SET Environment.variables.commonRefNo = SUBSTRING(Environment.Variables.InXML FROM charPosCommonRefStart+17 FOR commonRefLength);
+		SET Environment.variables.commonRefNo = SUBSTRING(Environment.variables.commonRefNo BEFORE '<');
+		DECLARE charPosSenderIdStart INTEGER POSITION('<SenderID>' IN Environment.Variables.InXML);
+		DECLARE charPosSenderIdEnd INTEGER POSITION('</SenderID>' IN Environment.Variables.InXML);
+		DECLARE senderIdLength INTEGER charPosSenderIdEnd - charPosSenderIdStart;
+		SET Environment.variables.msgSender = SUBSTRING(Environment.Variables.InXML FROM charPosSenderIdStart+10 FOR senderIdLength);
+		SET Environment.variables.msgSender = SUBSTRING(Environment.variables.msgSender BEFORE '<');
+	
+		DECLARE charPosPortCodeStart INTEGER POSITION('<PortCode>' IN Environment.Variables.InXML);
+		DECLARE charPosPortCodeEnd INTEGER POSITION('</PortCode>' IN Environment.Variables.InXML);
+		DECLARE portCodeLength INTEGER charPosPortCodeEnd - charPosPortCodeStart;
+		SET Environment.variables.portCode = SUBSTRING(Environment.Variables.InXML FROM charPosPortCodeStart+10 FOR portCodeLength);
+		SET Environment.variables.portCode = SUBSTRING(Environment.variables.portCode BEFORE '<');
+		SET Environment.variables.dbStartTime = PASSTHRU('SELECT CURRENT_TIMESTAMP AS DBSTARTTIME;');
+		
+		CALL EDI_XInsCOPRAR(InXML, Environment.Variable.results1[], Environment.Variable.results2[],Environment.Variable.results3[],Environment.Variable.results4[], Environment.Variable.results5[],Environment.Variable.results6[],Environment.Variable.results7[],Environment.Variable.results8[],Environment.Variable.results9[], Environment.Variable.results10[],Environment.Variable.results11[],Environment.Variable.results12[]);
+		COMMIT;
+	
+		SET Environment.variables.dbEndTime = PASSTHRU('SELECT CURRENT_TIMESTAMP AS DBENDTIME;');
+		IF (Environment.Variable.results5[1].ErrorMessage = 'Success')OR (Environment.Variable.results6[1].ErrorMessage = 'Success') OR (Environment.Variable.results7[1].ErrorMessage = 'Success')OR (Environment.Variable.results8[1].ErrorMessage = 'Success')OR (Environment.Variable.results9[1].ErrorMessage = 'Success') OR (Environment.Variable.results10[1].ErrorMessage = 'Success') OR (Environment.Variable.results11[1].ErrorMessage = 'Success') OR (Environment.Variable.results12[1].ErrorMessage = 'Success') THEN
+			SET Environment.variables.consumptionFlag = TRUE;
+			SET Environment.variables.agdordCommonRef = COALESCE(Environment.Variable.results2[1].TransactionID,Environment.Variable.results5[1].TransactionID,Environment.Variable.results6[1].TransactionID,Environment.Variable.results7[1].TransactionID,Environment.Variable.results8[1].TransactionID,Environment.Variable.results9[1].TransactionID,Environment.Variable.results10[1].TransactionID,Environment.Variable.results11[1].TransactionID,Environment.Variable.results12[1].TransactionID);
+			SET OutputRoot.JSON.Data.PCS.EDI.Action_In = 'COPRAR';		
+			SET OutputRoot.JSON.Data.PCS.EDI.Common_Ref = COALESCE(Environment.Variable.results2[1].TransactionID,Environment.Variable.results5[1].TransactionID,Environment.Variable.results6[1].TransactionID,Environment.Variable.results7[1].TransactionID,Environment.Variable.results8[1].TransactionID,Environment.Variable.results9[1].TransactionID,Environment.Variable.results10[1].TransactionID,Environment.Variable.results11[1].TransactionID,Environment.Variable.results12[1].TransactionID);
+			PROPAGATE TO TERMINAL 'out2';
+	        RETURN FALSE;	
+		ELSE
+			SET Environment.variables.consumptionFlag = FALSE;
+			SET Environment.variables.ackURL = PASSTHRU('SELECT FTP_PATH AS URL FROM IPAOWNER.XX_TPCS_DOC_PORT_MAP WHERE SITE_ID = ? AND MSG_TYPE = ?;',Environment.variables.msgSender,'ACKAPI');
+		    SET Environment.variables.AuditSeq = PASSTHRU('SELECT NEXT VALUE FOR IPAOWNER.TPCS_AUDIT_API_SEQ AS SEQ;');
+		    INSERT INTO Database.PCSIBM.TIBM_LOG_AUDIT_API(API_Request_ID,API_Channel_ID,API_Request_Date,SITE_ID,MS_REF_NO,MSG_TYPE,MSG_DIRECTION,API_URL,API_TIMESTAMP,TRM_STATUS,PAYLOAD_IN,AUDITSEQ) VALUES(Environment.variables.requestId,Environment.variables.channelId,CURRENT_TIMESTAMP,Environment.variables.msgSender,Environment.variables.commonRefNo,'AGDORDCT','INBOUND',Environment.variables.ackURL[1].URL,CURRENT_TIMESTAMP,'0',Environment.Variables.InXML,Environment.variables.AuditSeq[1].SEQ);
+		    INSERT INTO Database.PCSIBM.TIBM_LOG_ERROR(Executiongroup,Brokername,FlowName,ErrorCode,ErrorText,ErrorDate,MsgBody,XMLDATA,CREATED_DT,MS_REF_NO,EVENT_NAME,PORT_CODE) VALUES ('PCS_WEBSER','PCS_UAT_II','AGDORDCT_XML_API',COALESCE(Environment.Variable.results2[1].ErrorCode,Environment.Variable.results5[1].ErrorCode,Environment.Variable.results6[1].ErrorCode,Environment.Variable.results7[1].ErrorCode,Environment.Variable.results8[1].ErrorCode,Environment.Variable.results9[1].ErrorCode,Environment.Variable.results10[1].ErrorCode,Environment.Variable.results11[1].ErrorCode,Environment.Variable.results12[1].ErrorCode,''),COALESCE(Environment.Variable.results2[1].ErrorMessage,Environment.Variable.results5[1].ErrorMessage,Environment.Variable.results6[1].ErrorMessage,Environment.Variable.results7[1].ErrorMessage,Environment.Variable.results8[1].ErrorMessage,Environment.Variable.results9[1].ErrorMessage,Environment.Variable.results10[1].ErrorMessage,Environment.Variable.results11[1].ErrorMessage,Environment.Variable.results12[1].ErrorMessage,''),CURRENT_TIMESTAMP,'AGDORDCT_XML_API',Environment.Variables.InXML,CURRENT_TIMESTAMP,Environment.variables.commonRefNo,'Consumption',Environment.variables.portCode);		    
+		    COMMIT;
+		    SET Environment.variables.currentSeqValue = Environment.variables.AuditSeq[1].SEQ;
+			PROPAGATE TO TERMINAL 'out1';
+	    	RETURN FALSE;
+		END IF;		
+		
+	END;
+	CREATE PROCEDURE EDI_XInsCOPRAR (IN T CHARACTER)
+	LANGUAGE DATABASE
+	DYNAMIC RESULT SETS 12
+	EXTERNAL NAME "dbo.EDI_XInsCOPRAR";
+END MODULE;
+
+CREATE COMPUTE MODULE COPRAR_XML_API_mailSMSCall_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		SET Environment.variables.mailStartTime = PASSTHRU('SELECT CURRENT_TIMESTAMP AS MAILSTARTTIME;');
+		SET Environment.variables.mailEndTime = PASSTHRU('SELECT CURRENT_TIMESTAMP AS MAILENDTIME;');
+		SET Environment.variables.SMSStartTime = PASSTHRU('SELECT CURRENT_TIMESTAMP AS SMSSTARTTIME;');
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE COPRAR_XML_API_auditDetails_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN		
+		DECLARE charPosCommonRefStart INTEGER POSITION('<CommonRefNumber>' IN Environment.Variables.InXML);
+		DECLARE charPosCommonRefEnd INTEGER POSITION('</CommonRefNumber>' IN Environment.Variables.InXML);
+		DECLARE commonRefLength INTEGER charPosCommonRefEnd - charPosCommonRefStart;
+		SET OutputRoot.XMLNSC.auditDetails.RefNo = SUBSTRING(Environment.Variables.InXML FROM charPosCommonRefStart+17 FOR commonRefLength);
+		SET OutputRoot.XMLNSC.auditDetails.RefNo = SUBSTRING(OutputRoot.XMLNSC.auditDetails.RefNo BEFORE '<');
+		SET Environment.variables.commonRefNo = OutputRoot.XMLNSC.auditDetails.RefNo;
+		DECLARE auditDtlsRef REFERENCE TO OutputRoot.XMLNSC.auditDetails;
+		SET auditDtlsRef.msgUID = UUIDASCHAR;
+		SET auditDtlsRef.msgType = 'COPRAR_XML_API';
+		
+		DECLARE charPosPortCodeStart INTEGER POSITION('<PortCode>' IN Environment.Variables.InXML);
+		DECLARE charPosPortCodeEnd INTEGER POSITION('</PortCode>' IN Environment.Variables.InXML);
+		DECLARE portCodeLength INTEGER charPosPortCodeEnd - charPosPortCodeStart;
+		SET auditDtlsRef.portCode = SUBSTRING(Environment.Variables.InXML FROM charPosPortCodeStart+10 FOR portCodeLength);
+		SET auditDtlsRef.portCode = SUBSTRING(auditDtlsRef.portCode BEFORE '<');	
+			
+		SET auditDtlsRef.EVENT_NAME = 'Consumption';
+		DECLARE charPosSenderIdStart INTEGER POSITION('<SenderID>' IN Environment.Variables.InXML);
+		DECLARE charPosSenderIdEnd INTEGER POSITION('</SenderID>' IN Environment.Variables.InXML);
+		DECLARE senderIdLength INTEGER charPosSenderIdEnd - charPosSenderIdStart;
+		SET auditDtlsRef.msgSender = SUBSTRING(Environment.Variables.InXML FROM charPosSenderIdStart+10 FOR senderIdLength);
+		SET auditDtlsRef.msgSender = SUBSTRING(auditDtlsRef.msgSender BEFORE '<');
+		SET Environment.variables.msgSender = auditDtlsRef.msgSender;
+		SET auditDtlsRef.fileName = Environment.variables.agdordCommonRef;
+		SET auditDtlsRef.fileDirectory = 'APICall';
+		SET auditDtlsRef.MailId = 'NA';
+		SET auditDtlsRef.mobileNo = 'NA';
+
+		DECLARE ediStartTime CHARACTER Environment.variables.ediStartTime;
+		DECLARE mailStartTime CHARACTER Environment.variables.mailStartTime;
+		DECLARE mailEndTime CHARACTER Environment.variables.mailEndTime;
+		DECLARE dbStartTime CHARACTER CAST(Environment.variables.dbStartTime[1].DBSTARTTIME AS CHARACTER);
+		DECLARE dbEndTime CHARACTER CAST(Environment.variables.dbEndTime[1].DBENDTIME AS CHARACTER);
+		DECLARE SMSStartTime CHARACTER Environment.variables.SMSStartTime;
+
+		SET ediStartTime = REPLACE(ediStartTime,'TIMESTAMP ','');
+		SET ediStartTime = SUBSTRING(ediStartTime FROM 2 FOR 23);
+		SET auditDtlsRef.ediStartTime = ediStartTime;
+
+		SET mailStartTime = REPLACE(mailStartTime,'TIMESTAMP ','');
+		SET mailStartTime = SUBSTRING(mailStartTime FROM 2 FOR 23);
+		SET auditDtlsRef.mailStartTime = mailStartTime;
+
+		SET mailEndTime = REPLACE(mailEndTime,'TIMESTAMP ','');
+		SET mailEndTime = SUBSTRING(mailEndTime FROM 2 FOR 23);
+		SET auditDtlsRef.mailEndTime = mailEndTime;
+
+		SET SMSStartTime = REPLACE(SMSStartTime,'TIMESTAMP ','');
+		SET SMSStartTime = SUBSTRING(SMSStartTime FROM 2 FOR 23);
+		SET auditDtlsRef.SMSStartTime = SMSStartTime;
+
+		SET dbStartTime = REPLACE(dbStartTime,'TIMESTAMP ','');
+		SET dbStartTime = SUBSTRING(dbStartTime FROM 2 FOR 23);
+		SET auditDtlsRef.dbStartTime = dbStartTime;
+
+		SET dbEndTime = REPLACE(dbEndTime,'TIMESTAMP ','');
+		SET dbEndTime = SUBSTRING(dbEndTime FROM 2 FOR 23);
+		SET auditDtlsRef.dbEndTime = dbEndTime;
+	    SET Environment.variables.ackURL = PASSTHRU('SELECT FTP_PATH AS URL FROM IPAOWNER.XX_TPCS_DOC_PORT_MAP WHERE SITE_ID = ? AND MSG_TYPE = ?;',Environment.variables.msgSender,'ACKAPI');
+	    SET Environment.variables.AuditSeq = PASSTHRU('SELECT NEXT VALUE FOR IPAOWNER.TPCS_AUDIT_API_SEQ AS SEQ;');
+		INSERT INTO Database.PCSIBM.TIBM_LOG_AUDIT_API(API_Request_ID,API_Channel_ID,API_Request_Date,SITE_ID,MS_REF_NO,MSG_TYPE,MSG_DIRECTION,API_URL,API_TIMESTAMP,TRM_STATUS,PAYLOAD_IN,AUDITSEQ) VALUES(Environment.variables.requestId,Environment.variables.channelId,CURRENT_TIMESTAMP,Environment.variables.msgSender,Environment.variables.commonRefNo,'COPRAR','INBOUND',Environment.variables.ackURL[1].URL,CURRENT_TIMESTAMP,'0',Environment.Variables.InXML,Environment.variables.AuditSeq[1].SEQ);
+		COMMIT;
+		SET Environment.variables.currentSeqValue = Environment.variables.AuditSeq[1].SEQ;
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE COPRAR_XML_API_ackRequest_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		SET OutputRoot.XMLNSC.ACKAPI.siteId = Environment.variables.msgSender;
+		SET OutputRoot.XMLNSC.ACKAPI.docType = 'COPRAR';
+		SET OutputRoot.XMLNSC.ACKAPI.commonRefNo = Environment.variables.commonRefNo;
+		SET OutputRoot.XMLNSC.ACKAPI.seqNum = Environment.variables.currentSeqValue;
+		SET OutputRoot.XMLNSC.ACKAPI.requestId = Environment.variables.requestId;
+		SET OutputRoot.XMLNSC.ACKAPI.channelId = Environment.variables.channelId;
+		SET OutputRoot.XMLNSC.ACKAPI.serviceId = Environment.variables.serviceId;
+		IF (Environment.variables.consumptionFlag = TRUE) THEN
+			SET OutputRoot.XMLNSC.ACKAPI.status = 'Success';
+			SET OutputRoot.XMLNSC.ACKAPI.statusText = 'Successfully Consumed';
+		ELSE
+			SET OutputRoot.XMLNSC.ACKAPI.status = 'Failure';
+			SET OutputRoot.XMLNSC.ACKAPI.statusText = COALESCE(Environment.Variable.results2[1].ErrorCode,Environment.Variable.results5[1].ErrorCode,Environment.Variable.results6[1].ErrorCode,Environment.Variable.results7[1].ErrorCode,Environment.Variable.results8[1].ErrorCode,Environment.Variable.results9[1].ErrorCode,Environment.Variable.results10[1].ErrorCode,Environment.Variable.results11[1].ErrorCode,Environment.Variable.results12[1].ErrorCode,'')|| ' '||COALESCE(Environment.Variable.results2[1].ErrorMessage,Environment.Variable.results5[1].ErrorMessage,Environment.Variable.results6[1].ErrorMessage,Environment.Variable.results7[1].ErrorMessage,Environment.Variable.results8[1].ErrorMessage,Environment.Variable.results9[1].ErrorMessage,Environment.Variable.results10[1].ErrorMessage,Environment.Variable.results11[1].ErrorMessage,Environment.Variable.results12[1].ErrorMessage,'');					
+		END IF;		
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE COPRAR_XML_API_failure_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		SET OutputRoot.XMLNSC.errorDetails.messageFlowName = MessageFlowLabel;
+		SET OutputRoot.XMLNSC.errorDetails.messageBody = Environment.Variables.InXML;
+		SET OutputRoot.XMLNSC.errorDetails.exceptionList = InputExceptionList;
+
+		DECLARE charPosCommonRefStart INTEGER POSITION('<CommonRefNumber>' IN Environment.Variables.InXML);
+		DECLARE charPosCommonRefEnd INTEGER POSITION('</CommonRefNumber>' IN Environment.Variables.InXML);
+		DECLARE commonRefLength INTEGER charPosCommonRefEnd - charPosCommonRefStart;
+		SET Environment.variables.RefNo = SUBSTRING(Environment.Variables.InXML FROM charPosCommonRefStart+17 FOR commonRefLength);
+
+		SET OutputRoot.XMLNSC.errorDetails.msRefNo = SUBSTRING(Environment.variables.RefNo BEFORE '<');
+		SET OutputRoot.XMLNSC.errorDetails.eventName = 'Consumption';
+
+		CALL GetPartyDetailsBySenderWithFolder(Environment.Variables.msgSender,'', Environment.Variables.PortDtls[]);
+
+		SET OutputRoot.XMLNSC.errorDetails.portCode = Environment.Variables.PortDtls[1].PortCode;
+
+		IF (EXISTS(InputExceptionList.RecoverableException.RecoverableException.RecoverableException.RecoverableException.ParserException.ParserException[])) THEN
+			SET OutputRoot.XMLNSC.errorDetails.ErrorCode = InputExceptionList.RecoverableException.RecoverableException.RecoverableException.RecoverableException.ParserException.ParserException.Number;
+			SET OutputRoot.XMLNSC.errorDetails.ErrorText = InputExceptionList.RecoverableException.RecoverableException.RecoverableException.RecoverableException.ParserException.ParserException.Text;
+		ELSEIF (EXISTS(InputExceptionList.RecoverableException.DatabaseException.DatabaseException.DatabaseException[])) THEN
+			SET OutputRoot.XMLNSC.errorDetails.ErrorCode = InputExceptionList.RecoverableException.DatabaseException.DatabaseException.DatabaseException.Number;
+			SET OutputRoot.XMLNSC.errorDetails.ErrorText = InputExceptionList.RecoverableException.DatabaseException.DatabaseException.DatabaseException.Insert[3].Text;
+		ELSEIF (EXISTS(InputExceptionList.RecoverableException.RecoverableException.RecoverableException[])) THEN
+			SET OutputRoot.XMLNSC.errorDetails.ErrorCode = InputExceptionList.RecoverableException.RecoverableException.RecoverableException.Number;
+			SET OutputRoot.XMLNSC.errorDetails.ErrorText = InputExceptionList.RecoverableException.RecoverableException.RecoverableException.Text;
+		ELSEIF (Environment.variables.xsdValFail = TRUE)THEN
+			SET OutputRoot.XMLNSC.errorDetails.ErrorCode = Environment.Variable.results5[1].ERROR_CODE;
+			SET OutputRoot.XMLNSC.errorDetails.ErrorText = Environment.Variable.results5[1].Message;
+		ELSE
+			SET OutputRoot.XMLNSC.errorDetails.ErrorCode = 'ERR02';
+			SET OutputRoot.XMLNSC.errorDetails.ErrorText = 'ESB exception occurred';
+		END IF;	
+		
+		SET Environment.variables.consumptionFlag = FALSE;
+		SET Environment.variables.ackURL = PASSTHRU('SELECT FTP_PATH AS URL FROM IPAOWNER.XX_TPCS_DOC_PORT_MAP WHERE SITE_ID = ? AND MSG_TYPE = ?;',Environment.variables.msgSender,'ACKAPI');
+		SET Environment.variables.AuditSeq = PASSTHRU('SELECT NEXT VALUE FOR IPAOWNER.TPCS_AUDIT_API_SEQ AS SEQ;');
+		INSERT INTO Database.PCSIBM.TIBM_LOG_AUDIT_API(API_Request_ID,API_Channel_ID,API_Request_Date,SITE_ID,MS_REF_NO,MSG_TYPE,MSG_DIRECTION,API_URL,API_TIMESTAMP,TRM_STATUS,PAYLOAD_IN,AUDITSEQ) VALUES(Environment.variables.requestId,Environment.variables.channelId,CURRENT_TIMESTAMP,Environment.variables.msgSender,Environment.variables.commonRefNo,'COPRAR','INBOUND',Environment.variables.ackURL[1].URL,CURRENT_TIMESTAMP,'0',Environment.Variables.InXML,Environment.variables.AuditSeq[1].SEQ);
+		COMMIT;
+		SET Environment.variables.currentSeqValue = Environment.variables.AuditSeq[1].SEQ;
+	END;
+	CREATE PROCEDURE GetPartyDetailsBySenderWithFolder(IN senderID CHARACTER, IN p1 CHARACTER)
+	LANGUAGE DATABASE
+	DYNAMIC RESULT SETS 1
+	EXTERNAL NAME "dbo.GetPartyDetailsBySenderWithFolder";
+END MODULE;
