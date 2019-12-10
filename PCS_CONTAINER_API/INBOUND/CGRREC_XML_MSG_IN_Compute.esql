@@ -33,19 +33,19 @@ CREATE COMPUTE MODULE CGRREC_XML_MSG_IN_ProcessFile
 		DECLARE charPosCommonRefStart INTEGER POSITION('<CommonRefNumber>' IN Environment.Variables.InXML);
 		DECLARE charPosCommonRefEnd INTEGER POSITION('</CommonRefNumber>' IN Environment.Variables.InXML);
 		DECLARE commonRefLength INTEGER charPosCommonRefEnd - charPosCommonRefStart;
-		SET Environment.variables.commonRefNo =  SUBSTRING(Environment.Variables.InXML FROM charPosCommonRefStart+17 FOR commonRefLength);
-		SET Environment.variables.commonRefNo =  SUBSTRING(Environment.variables.commonRefNo BEFORE '<');
+		SET Environment.variables.commonRefNo = SUBSTRING(Environment.Variables.InXML FROM charPosCommonRefStart+17 FOR commonRefLength);
+		SET Environment.variables.commonRefNo = SUBSTRING(Environment.variables.commonRefNo BEFORE '<');
 		DECLARE charPosSenderIdStart INTEGER POSITION('<SenderID>' IN Environment.Variables.InXML);
 		DECLARE charPosSenderIdEnd INTEGER POSITION('</SenderID>' IN Environment.Variables.InXML);
 		DECLARE senderIdLength INTEGER charPosSenderIdEnd - charPosSenderIdStart;
-		SET Environment.variables.msgSender =  SUBSTRING(Environment.Variables.InXML FROM charPosSenderIdStart+10 FOR senderIdLength);
-		SET Environment.variables.msgSender =  SUBSTRING(Environment.variables.msgSender BEFORE '<');
+		SET Environment.variables.msgSender = SUBSTRING(Environment.Variables.InXML FROM charPosSenderIdStart+10 FOR senderIdLength);
+		SET Environment.variables.msgSender = SUBSTRING(Environment.variables.msgSender BEFORE '<');
 
 		DECLARE charPosPortCodeStart INTEGER POSITION('<PortofDischargeCode>' IN Environment.Variables.InXML);
 		DECLARE charPosPortCodeEnd INTEGER POSITION('</PortofDischargeCode>' IN Environment.Variables.InXML);
 		DECLARE portCodeLength INTEGER charPosPortCodeEnd - charPosPortCodeStart;
-		SET Environment.variables.portCode =  SUBSTRING(Environment.Variables.InXML FROM charPosPortCodeStart+21 FOR portCodeLength);
-		SET Environment.variables.portCode =  SUBSTRING(Environment.variables.portCode BEFORE '<');
+		SET Environment.variables.portCode = SUBSTRING(Environment.Variables.InXML FROM charPosPortCodeStart+21 FOR portCodeLength);
+		SET Environment.variables.portCode = SUBSTRING(Environment.variables.portCode BEFORE '<');
 
 		SET Environment.variables.dbStartTime = PASSTHRU('SELECT CURRENT_TIMESTAMP AS DBSTARTTIME;');
 		CALL EDI_XInsCGRREC(InXML, Environment.Variable.results1[], Environment.Variable.results2[],Environment.Variable.results3[],Environment.Variable.results4[], Environment.Variable.results5[],Environment.Variable.results6[],Environment.Variable.results7[],Environment.Variable.results8[],Environment.Variable.results9[], Environment.Variable.results10[],Environment.Variable.results11[],Environment.Variable.results12[]);
