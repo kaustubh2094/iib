@@ -29,13 +29,13 @@ CREATE COMPUTE MODULE PCS_CARCFN_ProcessFile_Compute
 		DECLARE charPosCommonRefStart INTEGER POSITION('<CommonRefNumber>' IN Environment.Variables.InXML);
 		DECLARE charPosCommonRefEnd INTEGER POSITION('</CommonRefNumber>' IN Environment.Variables.InXML);
 		DECLARE commonRefLength INTEGER charPosCommonRefEnd - charPosCommonRefStart;
-		SET Environment.variables.commonRefNo = SUBSTRING(Environment.Variables.InXML FROM charPosCommonRefStart+17 FOR commonRefLength);
-		SET Environment.variables.commonRefNo = SUBSTRING(Environment.variables.commonRefNo BEFORE '<');
+		SET Environment.variables.commonRefNo =  SUBSTRING(Environment.Variables.InXML FROM charPosCommonRefStart+17 FOR commonRefLength);
+		SET Environment.variables.commonRefNo =  SUBSTRING(Environment.variables.commonRefNo BEFORE '<');
 		DECLARE charPosSenderIdStart INTEGER POSITION('<SenderID>' IN Environment.Variables.InXML);
 		DECLARE charPosSenderIdEnd INTEGER POSITION('</SenderID>' IN Environment.Variables.InXML);
 		DECLARE senderIdLength INTEGER charPosSenderIdEnd - charPosSenderIdStart;
-		SET Environment.variables.msgSender = SUBSTRING(Environment.Variables.InXML FROM charPosSenderIdStart+10 FOR senderIdLength);
-		SET Environment.variables.msgSender = SUBSTRING(Environment.variables.msgSender BEFORE '<');
+		SET Environment.variables.msgSender =  SUBSTRING(Environment.Variables.InXML FROM charPosSenderIdStart+10 FOR senderIdLength);
+		SET Environment.variables.msgSender =  SUBSTRING(Environment.variables.msgSender BEFORE '<');
 	
 		DECLARE charPosPortCodeStart INTEGER POSITION('<PortCode>' IN Environment.Variables.InXML);
 		DECLARE charPosPortCodeEnd INTEGER POSITION('</PortCode>' IN Environment.Variables.InXML);
