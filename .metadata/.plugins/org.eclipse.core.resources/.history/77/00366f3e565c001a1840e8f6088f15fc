@@ -10,9 +10,9 @@ CREATE COMPUTE MODULE CUSTOM_09E_API_ConstructRequest
 	CREATE FUNCTION Main() RETURNS BOOLEAN
 	BEGIN
 		CREATE FIELD OutputRoot.JSON.Data.ReqHeader;
-		SET OutputRoot.JSON.Data.ReqHeader.Channel_ID ='IndianPCS';
-		SET OutputRoot.JSON.Data.ReqHeader.Service_ID ='112312';
-		SET OutputRoot.JSON.Data.ReqHeader.Request_ID =InputRoot.XMLNSC.Data.CommonRef;
+		SET OutputRoot.JSON.Data.ReqHeader.Channel_ID = 'IndianPCS';
+		SET OutputRoot.JSON.Data.ReqHeader.Service_ID = '112312';
+		SET OutputRoot.JSON.Data.ReqHeader.Request_ID = InputRoot.XMLNSC.Data.CommonRef;
 		SET Environment.ReqDate = PASSTHRU('SELECT CURRENT_TIMESTAMP AS WebReq');
 		SET OutputRoot.JSON.Data.ReqHeader.Request_Date = CAST(Environment.ReqDate[1].WebReq AS CHARACTER);
 		SET OutputRoot.JSON.Data.ReqHeader.Request_Date = REPLACE(OutputRoot.JSON.Data.ReqHeader.Request_Date,'TIMESTAMP ','');
