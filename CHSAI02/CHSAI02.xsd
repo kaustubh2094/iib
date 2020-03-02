@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+          <!-- XML Schema Generated from XML Document on Wed Feb 19 2020 14:48:55 GMT+0530 (India Standard Time) -->
+          <!-- with XmlGrid.net Free Online Service http://xmlgrid.net -->
+       <xs:element name="CHSAI02Payload">
+              <xs:complexType>
+                     <xs:sequence>
+                            <xs:element name="DocumentHeader">
+                                   <xs:complexType>
+                                          <xs:sequence>
+                                                 <xs:element name="SenderIdQualifier" type="xs:string"></xs:element>
+                                                 <xs:element name="SenderId" type="xs:string"></xs:element>
+                                                 <xs:element name="ReceiverIdQualifier" type="xs:string"></xs:element>
+                                                 <xs:element name="ReceiverId" type="xs:string"></xs:element>
+                                                 <xs:element name="VersionNumber" type="xs:string"></xs:element>
+                                                 <xs:element name="TestProductionFlag" type="xs:string"></xs:element>
+                                                 <xs:element name="MessageId" type="xs:string"></xs:element>
+                                                 <xs:element name="ControlNumber" type="xs:string"></xs:element>
+                                                 <xs:element name="SentDate" type="xs:int"></xs:element>
+                                                 <xs:element name="SentTime" type="xs:int"></xs:element>
+                                                 <xs:element name="PCSCommonRefNumber" type="xs:int"></xs:element>
+                                             </xs:sequence>
+                                      </xs:complexType>
+                               </xs:element>
+                            <xs:element name="entryin">
+                                   <xs:complexType>
+                                          <xs:sequence>
+                                                 <xs:element name="MessageType" type="xs:string"></xs:element>
+                                                 <xs:element name="CustomHouseCode" type="xs:string"></xs:element>
+                                                 <xs:element name="IGMNO" type="xs:int"></xs:element>
+                                                 <xs:element name="IGMDate" type="xs:int"></xs:element>
+                                                 <xs:element name="DateofEntryinward" type="xs:string"></xs:element>
+                                             </xs:sequence>
+                                      </xs:complexType>
+                               </xs:element>
+                        </xs:sequence>
+                 </xs:complexType>
+          </xs:element>
+   </xs:schema>

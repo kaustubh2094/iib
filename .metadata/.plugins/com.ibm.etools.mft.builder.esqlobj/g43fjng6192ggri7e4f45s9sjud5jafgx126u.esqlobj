@@ -1,0 +1,42 @@
+CREATE COMPUTE MODULE CUSTOM_02I_API_ConstructResponse
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE resp CHARACTER;
+		DECLARE inCCSID INT 1208;
+		DECLARE inEncoding INT 546;
+		DECLARE crmno CHARACTER;
+		SET Environment.ResDate = PASSTHRU('SELECT CURRENT_TIMESTAMP AS WebRes');
+		SET Environment.ResDate = CAST(Environment.ResDate[1].WebRes AS CHARACTER);
+
+		SET resp = CAST(InputRoot.BLOB.BLOB AS CHARACTER CCSID 1208);
+		CREATE LASTCHILD OF OutputLocalEnvironment DOMAIN('JSON') PARSE(InputRoot.BLOB.BLOB,inEncoding,inCCSID,'BLOB','JSON');
+
+		SET OutputRoot.XML.PCS_Audit.Header.MS_REF_NO = OutputLocalEnvironment.JSON.Data.ReqHeader.Request_ID;
+		DECLARE logreff REFERENCE TO OutputRoot.XML.PCS_Audit.Header;
+		SET logreff.MSG_UID = UUIDASCHAR;
+		SET logreff.MSG_TYPE = 'CHSAI02_API';
+		SET logreff.MSG_TIME = CURRENT_TIMESTAMP;
+		SET logreff.MSG_SNDR = BrokerUserId||','||ExecutionGroupLabel||','||BrokerName;
+		SET logreff.EDI_START_TS = Environment.ReqDate.WebReq;
+		SET logreff.EDI_END_TS = Environment.ResDate.WebRes;
+		SET logreff.PORT_CODE = Environment.portcode;
+		SET logreff.EVENT_NAME = 'APICall';
+		SET OutputRoot.XML.PCS_Audit.Details.Message[1].FILE_NAME = 'NoFile';
+		SET OutputRoot.XML.PCS_Audit.Details.Message[1].EDI_DIRECTORY_INFO = 'APICall';
+
+		DECLARE inputXML CHAR;
+		DECLARE blobdata BLOB;
+		SET blobdata = ASBITSTREAM(OutputRoot.XML);
+		SET inputXML = CAST(blobdata as CHAR CCSID 1208);
+		SET inputXML = REPLACE(inputXML, 'encoding="utf-8"', 'encoding="utf-16"');
+
+		CALL EDI_InsIIBAudit(inputXML);
+		COMMIT;
+		SET crmno = Environment.commonref;
+		UPDATE Database.PCSIBM.TIBM_LOG_AUDIT_API AS SP SET TRM_STATUS = '1',RES_PAYLOAD = resp WHERE SP.MS_REF_NO = crmno AND SP.AUDITSEQ = Environment.variables.AuditSeq[1].SEQ;
+		COMMIT;
+		RETURN TRUE;
+	END;
+	CREATE PROCEDURE EDI_InsIIBAudit(IN p1 CHARACTER) LANGUAGE DATABASE EXTERNAL NAME "dbo.EDI_InsIIBAudit";
+
+END MODULE;

@@ -29,5 +29,11 @@
 <workingSet editPageId="com.ibm.etools.mft.navigator.BrokerWorkingSet.AppLib" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1583139271564_9" label="[CHPOE11_API]" name="[CHPOE11_API]">
 <item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/CHPOE11_API" type="4"/>
 </workingSet>
+<workingSet editPageId="com.ibm.etools.mft.navigator.BrokerWorkingSet.AppLib" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1583146416117_12" label="[CHSAI02]" name="[CHSAI02]">
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/CHSAI02" type="4"/>
+</workingSet>
+<workingSet editPageId="com.ibm.etools.mft.navigator.BrokerWorkingSet.AppLib" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1583146416117_13" label="[CHSAI02_API]" name="[CHSAI02_API]">
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/CHSAI02_API" type="4"/>
+</workingSet>
 <workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1583132393560_0" label="Window Working Set" name="Aggregate for window 1583132393559"/>
 </workingSetManager>
