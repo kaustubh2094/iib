@@ -1,0 +1,20 @@
+CREATE COMPUTE MODULE GATRCI_XML_API
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE blobdata BLOB;
+		IF FIELDNAME(InputRoot.MQMD) IS NOT NULL THEN
+			SET blobdata = ASBITSTREAM(InputRoot.XMLNSC.gatrci.payload);
+			SET OutputRoot.BLOB.BLOB = blobdata;
+			SET Environment.MQ = InputRoot.MQMD;
+			SET Environment.variables.APICall = TRUE;
+			SET Environment.variables.channelId = InputRoot.XMLNSC.gatrci.channelId;
+			SET Environment.variables.requestId = InputRoot.XMLNSC.gatrci.requestId;
+			SET Environment.variables.serviceId = InputRoot.XMLNSC.gatrci.serviceId;
+		ELSE
+			SET Environment.variables.APICall = FALSE;
+			SET blobdata = ASBITSTREAM(InputRoot.XMLNSC);
+			SET OutputRoot.BLOB.BLOB = blobdata;
+		END IF;
+		RETURN TRUE;
+	END;
+END MODULE;

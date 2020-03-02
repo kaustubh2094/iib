@@ -1,0 +1,40 @@
+!SESSION 2020-03-02 12:29:43.827 -----------------------------------------------
+eclipse.buildId=4.4.2.M20150204-1700
+java.fullversion=8.0.5.35 - pwa6480sr5fp35ifix-20190524_01(SR5 FP35+IJ15979)
+JRE 1.8.0 Windows 10 amd64-64-Bit Compressed References 20190524_417294 (JIT enabled, AOT enabled)
+OpenJ9   - 321e430
+OMR      - 16b77d7
+IBM      - 72459d3
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=en_US
+Framework arguments:  -showlocation -product com.ibm.etools.msgbroker.tooling.ide tools_auto -showlocation -product com.ibm.etools.msgbroker.tooling.ide
+Command-line arguments:  -data C:\Users\kaustubhs\Desktop\Gittry\iib -os win32 -ws win32 -arch x86_64 -showlocation -product com.ibm.etools.msgbroker.tooling.ide tools_auto -showlocation -product com.ibm.etools.msgbroker.tooling.ide
+
+!ENTRY org.eclipse.emf.ecore 2 0 2020-03-02 12:29:45.742
+!MESSAGE Both 'com.ibm.etools.javaee.core' and 'com.ibm.etools.mft.service.model' register an extension parser for 'application'
+
+!ENTRY org.eclipse.ui 2 2 2020-03-02 12:29:48.012
+!MESSAGE Invalid preference category path: com.ibm.importer.preferences (bundle: com.ibm.adapter.c, page: com.ibm.adapter.c.ui.preferencepage.CPreferencePage)
+
+!ENTRY org.eclipse.ui 2 2 2020-03-02 12:29:48.014
+!MESSAGE Invalid preference category path: com.ibm.debug.breakpoints.common.pref.tracepoint (bundle: com.ibm.debug.wsa, page: com.ibm.debug.wsa.WSATracepointPreferencePage)
+
+!ENTRY org.eclipse.ui 2 2 2020-03-02 12:29:48.015
+!MESSAGE Invalid preference category path: com.ibm.importer.preferences (bundle: com.ibm.etools.cobol.preference.ui, page: com.ibm.etools.cobol.preference.ui.preferencepage.CobolPreferencePage)
+
+!ENTRY com.ibm.mq.runtime 1 0 2020-03-02 12:29:49.449
+!MESSAGE 
+
+!ENTRY com.ibm.mq.runtime 1 0 2020-03-02 12:29:49.450
+!MESSAGE C:\Program Files\IBM\IIB\10.0.0.18\tools>mqsifindmqpath
+
+!ENTRY com.ibm.mq.runtime 1 0 2020-03-02 12:29:49.756
+!MESSAGE BIP8071I: Successful command completion. C:\Program Files\MQ
+
+!ENTRY com.ibm.mq.runtime 1 0 2020-03-02 12:29:49.757
+!MESSAGE MQ Install location found:C:/Program Files/MQ
+
+!ENTRY com.ibm.mq.runtime 1 0 2020-03-02 12:29:49.757
+!MESSAGE 
+
+!ENTRY com.ibm.etools.mft.uri 0 0 2020-03-02 12:31:48.770
+!MESSAGE 

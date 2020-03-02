@@ -1,0 +1,11 @@
+CREATE COMPUTE MODULE AGDORDCT_XML_API_inputData_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE blobdata BLOB ASBITSTREAM(InputRoot.XMLNSC.agdord.payload);
+		SET OutputRoot.BLOB.BLOB = blobdata;
+		SET Environment.MQ = InputRoot.MQMD;
+		SET Environment.variables.channelId = InputRoot.XMLNSC.agdord.channelId;
+		SET Environment.variables.requestId = InputRoot.XMLNSC.agdord.requestId;
+		SET Environment.variables.serviceId = InputRoot.XMLNSC.agdord.serviceId;
+	END;
+END MODULE;

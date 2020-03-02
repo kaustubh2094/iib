@@ -1,0 +1,133 @@
+CREATE COMPUTE MODULE PCS_CONTAINER_API_routeMessage_Route_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		IF(InputRoot.XMLNSC.ContainerDeliveryOrder.DocumentHeader.DocumentReference.DocumentType = 'AGDORD') THEN
+			DECLARE typeOfOrder CHARACTER InputRoot.XMLNSC.ContainerDeliveryOrder.DocumentDetails.ContainerDOHeader.TypeOfDeliveryOrder;
+			DECLARE recordType CHARACTER InputRoot.XMLNSC.ContainerDeliveryOrder.DocumentDetails.ContainerDOSummary.ContainerDODetails.RecordType;
+			DECLARE inputRefDtls REFERENCE TO InputRoot.XMLNSC.ContainerDeliveryOrder.DocumentDetails.ContainerDOSummary.ContainerDODetails;
+			DECLARE inputRefHdr REFERENCE TO InputRoot.XMLNSC.ContainerDeliveryOrder.DocumentDetails.ContainerDOHeader;
+			IF (inputRefHdr.TypeOfDeliveryOrder = 'P' AND inputRefDtls.Containerised = 'Y' AND LENGTH(inputRefDtls.ContainerNo) < 1) THEN
+				SET Environment.variables.exception1 = TRUE;
+				THROW EXCEPTION;
+			ELSEIF(inputRefHdr.TypeOfDeliveryOrder = 'P' AND inputRefDtls.Containerised = 'Y' AND LENGTH(inputRefDtls.ValidUpTo) < 1) THEN
+				SET Environment.variables.exception2 = TRUE;
+				THROW EXCEPTION;
+			ELSEIF(inputRefHdr.TypeOfDeliveryOrder = 'P' AND inputRefDtls.Containerised = 'Y' AND LENGTH(inputRefDtls.ContISOCode) < 1) THEN
+				SET Environment.variables.exception3 = TRUE;
+				THROW EXCEPTION;
+			ELSEIF(inputRefHdr.TypeOfDeliveryOrder = 'P' AND inputRefDtls.Containerised = 'Y' AND LENGTH(inputRefDtls.ContainerSealNumber) < 1) THEN
+				SET Environment.variables.exception4 = TRUE;
+				THROW EXCEPTION;
+			ELSEIF(inputRefHdr.TypeOfDeliveryOrder = 'P' AND inputRefDtls.Containerised = 'Y' AND LENGTH(inputRefDtls.NumberOfPackages) < 1) THEN
+				SET Environment.variables.exception5 = TRUE;
+				THROW EXCEPTION;
+			ELSEIF(inputRefHdr.TypeOfDeliveryOrder = 'P' AND inputRefDtls.Containerised = 'Y' AND LENGTH(inputRefDtls.PackageCode) < 1) THEN
+				SET Environment.variables.exception6 = TRUE;
+				THROW EXCEPTION;
+			ELSE
+				SET OutputRoot.XMLNSC.agdord.payload = InputRoot.XMLNSC;
+				SET OutputRoot.XMLNSC.agdord.requestId = Environment.variables.requestId;
+				SET OutputRoot.XMLNSC.agdord.channelId = Environment.variables.channelId; 
+				SET OutputRoot.XMLNSC.agdord.serviceId = Environment.variables.serviceId;
+				SET OutputLocalEnvironment.Destination.MQDestinationList.DestinationData[1].queueName = 'AGDORDCT.API.IN';
+			END IF;			
+		ELSEIF(InputRoot.XMLNSC.ContainerLoadPlan.DocumentHeader.DocumentReference.DocumentType = 'CLPMSG') THEN
+			SET OutputRoot.XMLNSC.clpmsg.payload = InputRoot.XMLNSC;
+			SET OutputRoot.XMLNSC.clpmsg.requestId = Environment.variables.requestId;
+			SET OutputRoot.XMLNSC.clpmsg.channelId = Environment.variables.channelId; 
+			SET OutputRoot.XMLNSC.clpmsg.serviceId = Environment.variables.serviceId;
+			SET OutputLocalEnvironment.Destination.MQDestinationList.DestinationData[1].queueName = 'CLPMSG.API.IN';
+		ELSEIF(InputRoot.XMLNSC.ContLoadingNDischargeOder.DocumentHeader.DocumentReference.DocumentType = 'COARRI') THEN
+			SET OutputRoot.XMLNSC.coarri.payload = InputRoot.XMLNSC;
+			SET OutputRoot.XMLNSC.coarri.requestId = Environment.variables.requestId;
+			SET OutputRoot.XMLNSC.coarri.channelId = Environment.variables.channelId;
+			SET OutputRoot.XMLNSC.coarri.serviceId = Environment.variables.serviceId;
+			SET OutputLocalEnvironment.Destination.MQDestinationList.DestinationData[1].queueName = 'COARRI.IN';
+		ELSEIF(InputRoot.XMLNSC.CODECODetails.DocumentHeader.DocumentReference.DocumentType = 'CODECO') THEN
+			SET OutputRoot.XMLNSC.codeco.payload = InputRoot.XMLNSC;
+			SET OutputRoot.XMLNSC.codeco.requestId = Environment.variables.requestId;
+			SET OutputRoot.XMLNSC.codeco.channelId = Environment.variables.channelId;
+			SET OutputRoot.XMLNSC.codeco.serviceId = Environment.variables.serviceId;
+			SET OutputLocalEnvironment.Destination.MQDestinationList.DestinationData[1].queueName = 'CODECO.IN';
+		ELSEIF(InputRoot.XMLNSC.EICREPDetails.DocumentHeader.DocumentReference.DocumentType = 'EICREP') THEN
+			SET OutputRoot.XMLNSC.eicrep.payload = InputRoot.XMLNSC;
+			SET OutputRoot.XMLNSC.eicrep.requestId = Environment.variables.requestId;
+			SET OutputRoot.XMLNSC.eicrep.channelId = Environment.variables.channelId;
+			SET OutputRoot.XMLNSC.eicrep.serviceId = Environment.variables.serviceId;
+			SET OutputLocalEnvironment.Destination.MQDestinationList.DestinationData[1].queueName = 'EICREP.IN';
+		ELSEIF(InputRoot.XMLNSC.ContainerStockreportDetails.DocumentHeader.DocumentReference.DocumentType = 'COEDOR') THEN
+			SET OutputRoot.XMLNSC.coedor.payload = InputRoot.XMLNSC;
+			SET OutputRoot.XMLNSC.coedor.requestId = Environment.variables.requestId;
+			SET OutputRoot.XMLNSC.coedor.channelId = Environment.variables.channelId;
+			SET OutputRoot.XMLNSC.coedor.serviceId = Environment.variables.serviceId;
+			SET OutputLocalEnvironment.Destination.MQDestinationList.DestinationData[1].queueName = 'COEDOR.IN';
+		ELSEIF(InputRoot.XMLNSC.ContStuffing.DocumentHeader.DocumentReference.DocumentType = 'COSTCO') THEN
+			SET OutputRoot.XMLNSC.costco.payload = InputRoot.XMLNSC;
+			SET OutputRoot.XMLNSC.costco.requestId = Environment.variables.requestId;
+			SET OutputRoot.XMLNSC.costco.channelId = Environment.variables.channelId;
+			SET OutputRoot.XMLNSC.costco.serviceId = Environment.variables.serviceId;
+			SET OutputLocalEnvironment.Destination.MQDestinationList.DestinationData[1].queueName = 'COSTCO.IN';
+		ELSEIF(InputRoot.XMLNSC.ConfirmForCarting.DocumentHeader.DocumentReference.DocumentType = 'CARCFN') THEN
+			SET OutputRoot.XMLNSC.carcfn.payload = InputRoot.XMLNSC;
+			SET OutputRoot.XMLNSC.carcfn.requestId = Environment.variables.requestId;
+			SET OutputRoot.XMLNSC.carcfn.channelId = Environment.variables.channelId;
+			SET OutputRoot.XMLNSC.carcfn.serviceId = Environment.variables.serviceId;
+			SET OutputLocalEnvironment.Destination.MQDestinationList.DestinationData[1].queueName = 'CARCFN.IN';
+        ELSEIF(InputRoot.XMLNSC.AdvContainerList.DocumentHeader.DocumentReference.DocumentType = 'COPRAR') THEN
+			SET OutputRoot.XMLNSC.coprar.payload = InputRoot.XMLNSC;
+			SET OutputRoot.XMLNSC.coprar.requestId = Environment.variables.requestId;
+			SET OutputRoot.XMLNSC.coprar.channelId = Environment.variables.channelId;
+			SET OutputRoot.XMLNSC.coprar.serviceId = Environment.variables.serviceId;
+			SET OutputLocalEnvironment.Destination.MQDestinationList.DestinationData[1].queueName = 'COPRAR.API.IN'; 
+	 	ELSEIF(InputRoot.XMLNSC.ConfirmationContainerPriority.DocumentHeader.DocumentReference.DocumentType = 'CNFCNP') THEN
+			SET OutputRoot.XMLNSC.cnfcnp.payload = InputRoot.XMLNSC;
+			SET OutputRoot.XMLNSC.cnfcnp.requestId = Environment.variables.requestId;
+			SET OutputRoot.XMLNSC.cnfcnp.channelId = Environment.variables.channelId;
+			SET OutputRoot.XMLNSC.cnfcnp.serviceId = Environment.variables.serviceId;
+			SET OutputLocalEnvironment.Destination.MQDestinationList.DestinationData[1].queueName = 'CNFCNP.IN';
+		ELSEIF(InputRoot.XMLNSC.ConfirmationContainerWeighment.DocumentHeader.DocumentReference.DocumentType = 'CNFCNW') THEN
+			SET OutputRoot.XMLNSC.cnfcnw.payload = InputRoot.XMLNSC;
+			SET OutputRoot.XMLNSC.cnfcnw.requestId = Environment.variables.requestId;
+			SET OutputRoot.XMLNSC.cnfcnw.channelId = Environment.variables.channelId;
+			SET OutputRoot.XMLNSC.cnfcnw.serviceId = Environment.variables.serviceId;
+			SET OutputLocalEnvironment.Destination.MQDestinationList.DestinationData[1].queueName = 'CNFCNW.IN';
+		ELSEIF(InputRoot.XMLNSC.ConfirmationContainerGrounding.DocumentHeader.DocumentReference.DocumentType = 'CNFCNG') THEN
+			SET OutputRoot.XMLNSC.cnfcng.payload = InputRoot.XMLNSC;
+			SET OutputRoot.XMLNSC.cnfcng.requestId = Environment.variables.requestId;
+			SET OutputRoot.XMLNSC.cnfcng.channelId = Environment.variables.channelId;
+			SET OutputRoot.XMLNSC.cnfcng.serviceId = Environment.variables.serviceId;
+			SET OutputLocalEnvironment.Destination.MQDestinationList.DestinationData[1].queueName = 'CNFCNG.IN'; 
+		ELSEIF(InputRoot.XMLNSC.GateTransactionsContainer.DocumentHeader.DocumentReference.DocumentType = 'GATRCE') THEN
+			SET OutputRoot.XMLNSC.gatrce.payload = InputRoot.XMLNSC;
+			SET OutputRoot.XMLNSC.gatrce.requestId = Environment.variables.requestId;
+			SET OutputRoot.XMLNSC.gatrce.channelId = Environment.variables.channelId;
+			SET OutputRoot.XMLNSC.gatrce.serviceId = Environment.variables.serviceId;
+			SET OutputLocalEnvironment.Destination.MQDestinationList.DestinationData[1].queueName = 'GATRCE.IN'; 
+		ELSEIF(InputRoot.XMLNSC.GateTransactionsContainer.DocumentHeader.DocumentReference.DocumentType = 'GATRCI') THEN
+			SET OutputRoot.XMLNSC.gatrci.payload = InputRoot.XMLNSC;
+			SET OutputRoot.XMLNSC.gatrci.requestId = Environment.variables.requestId;
+			SET OutputRoot.XMLNSC.gatrci.channelId = Environment.variables.channelId;
+			SET OutputRoot.XMLNSC.gatrci.serviceId = Environment.variables.serviceId;
+			SET OutputLocalEnvironment.Destination.MQDestinationList.DestinationData[1].queueName = 'GATRCI.IN';
+		ELSEIF(InputRoot.XMLNSC.CartingReceiptRes.DocumentHeader.DocumentReference.DocumentType = 'CGRREC') THEN
+			SET OutputRoot.XMLNSC.cgrrec.payload = InputRoot.XMLNSC;
+			SET OutputRoot.XMLNSC.cgrrec.requestId = Environment.variables.requestId;
+			SET OutputRoot.XMLNSC.cgrrec.channelId = Environment.variables.channelId;
+			SET OutputRoot.XMLNSC.cgrrec.serviceId = Environment.variables.serviceId;
+			SET OutputLocalEnvironment.Destination.MQDestinationList.DestinationData[1].queueName = 'CGRREC.IN';   
+		ELSEIF(InputRoot.XMLNSC.ConfirmationSealCutting.DocumentHeader.DocumentReference.DocumentType = 'CNFSLC') THEN
+			SET OutputRoot.XMLNSC.cnfslc.payload = InputRoot.XMLNSC;
+			SET OutputRoot.XMLNSC.cnfslc.requestId = Environment.variables.requestId;
+			SET OutputRoot.XMLNSC.cnfslc.channelId = Environment.variables.channelId;
+			SET OutputRoot.XMLNSC.cnfslc.serviceId = Environment.variables.serviceId;
+			SET OutputLocalEnvironment.Destination.MQDestinationList.DestinationData[1].queueName = 'CNFSLC.IN';          
+		END IF;
+		PROPAGATE TO TERMINAL 'out2';
+		CREATE FIELD OutputRoot.JSON.Data;
+		DECLARE OM REFERENCE TO OutputRoot.JSON.Data;
+		SET OM.Output.RespCde = '1';
+		SET OM.Output.Remarks = 'Your Request has been accepted';
+		PROPAGATE TO TERMINAL 'out1';
+		RETURN TRUE;
+	END;
+END MODULE;

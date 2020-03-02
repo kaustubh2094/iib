@@ -1,0 +1,15 @@
+/*EATE FUNCTION Main() RETURNS BOOLE*/
+	BEGIN
+		DECLARE InXML CHARACTER;
+		SET InXML = Environment.Variables.InXML;
+
+		DECLARE incField, pfield CHAR;
+		DECLARE bF BLOB;
+		SET incField = InXML;
+		SET bF = CAST(incField AS BLOB CCSID 1208);
+		DECLARE inCCSID INT InputProperties.CodedCharSetId;
+		DECLARE inEncoding INT InputProperties.Encoding;
+		DECLARE inBitStream BLOB ASBITSTREAM(InputRoot.BLOB, inEncoding, inCCSID);
+		CREATE LASTCHILD OF OutputLocalEnvironment DOMAIN('XMLNSC') PARSE(bF, inEncoding, inCCSID,'BLOB', 'XMLNSC');
+		SET OutputRoot.XMLNSC = OutputLocalEnvironment.XMLNSC;
+	END;

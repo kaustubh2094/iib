@@ -1,0 +1,19 @@
+CREATE COMPUTE MODULE COPRAR_XML_API_ackRequest_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		SET OutputRoot.XMLNSC.ACKAPI.siteId = Environment.variables.msgSender;
+		SET OutputRoot.XMLNSC.ACKAPI.docType = 'COPRAR';
+		SET OutputRoot.XMLNSC.ACKAPI.commonRefNo = Environment.variables.commonRefNo;
+		SET OutputRoot.XMLNSC.ACKAPI.seqNum = Environment.variables.currentSeqValue;
+		SET OutputRoot.XMLNSC.ACKAPI.requestId = Environment.variables.requestId;
+		SET OutputRoot.XMLNSC.ACKAPI.channelId = Environment.variables.channelId;
+		SET OutputRoot.XMLNSC.ACKAPI.serviceId = Environment.variables.serviceId;
+		IF (Environment.variables.consumptionFlag = TRUE) THEN
+			SET OutputRoot.XMLNSC.ACKAPI.status = 'Success';
+			SET OutputRoot.XMLNSC.ACKAPI.statusText = 'Successfully Consumed';
+		ELSE
+			SET OutputRoot.XMLNSC.ACKAPI.status = 'Failure';
+			SET OutputRoot.XMLNSC.ACKAPI.statusText = COALESCE(Environment.Variable.results2[1].ErrorCode,Environment.Variable.results5[1].ErrorCode,Environment.Variable.results6[1].ErrorCode,Environment.Variable.results7[1].ErrorCode,Environment.Variable.results8[1].ErrorCode,Environment.Variable.results9[1].ErrorCode,Environment.Variable.results10[1].ErrorCode,Environment.Variable.results11[1].ErrorCode,Environment.Variable.results12[1].ErrorCode,'')|| ' '||COALESCE(Environment.Variable.results2[1].ErrorMessage,Environment.Variable.results5[1].ErrorMessage,Environment.Variable.results6[1].ErrorMessage,Environment.Variable.results7[1].ErrorMessage,Environment.Variable.results8[1].ErrorMessage,Environment.Variable.results9[1].ErrorMessage,Environment.Variable.results10[1].ErrorMessage,Environment.Variable.results11[1].ErrorMessage,Environment.Variable.results12[1].ErrorMessage,'');					
+		END IF;		
+	END;
+END MODULE;

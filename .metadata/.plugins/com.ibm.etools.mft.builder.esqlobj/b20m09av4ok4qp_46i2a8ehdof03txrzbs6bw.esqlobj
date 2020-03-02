@@ -1,0 +1,9 @@
+/*EATE FUNCTION Main() RETURNS BOOLE*/
+	BEGIN
+		DECLARE blobdata BLOB ASBITSTREAM(InputRoot.XMLNSC.coprar.payload);
+		SET OutputRoot.BLOB.BLOB = blobdata;
+		SET Environment.MQ = InputRoot.MQMD;
+		SET Environment.variables.channelId = InputRoot.XMLNSC.coprar.channelId;
+		SET Environment.variables.requestId = InputRoot.XMLNSC.coprar.requestId;
+		SET Environment.variables.serviceId = InputRoot.XMLNSC.coprar.serviceId;
+	END;

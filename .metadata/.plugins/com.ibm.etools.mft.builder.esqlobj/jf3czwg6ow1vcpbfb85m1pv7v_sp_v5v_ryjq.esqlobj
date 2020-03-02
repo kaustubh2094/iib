@@ -1,0 +1,18 @@
+/*EATE FUNCTION Main() RETURNS BOOLE*/
+	BEGIN
+		DECLARE blobdata BLOB;
+		IF FIELDNAME(InputRoot.MQMD) IS NOT NULL THEN
+			SET blobdata = ASBITSTREAM(InputRoot.XMLNSC.cnfcng.payload);
+			SET OutputRoot.BLOB.BLOB = blobdata;
+			SET Environment.MQ = InputRoot.MQMD;
+			SET Environment.variables.APICall = TRUE;
+			SET Environment.variables.channelId = InputRoot.XMLNSC.cnfcng.channelId;
+			SET Environment.variables.requestId = InputRoot.XMLNSC.cnfcng.requestId;
+			SET Environment.variables.serviceId = InputRoot.XMLNSC.cnfcng.serviceId;
+		ELSE
+			SET Environment.variables.APICall = FALSE;
+			-- SET blobdata = ASBITSTREAM(InputRoot.XMLNSC);
+			SET OutputRoot.BLOB.BLOB = InputRoot.BLOB.BLOB;
+		END IF;
+		RETURN TRUE;
+	END;

@@ -1,0 +1,51 @@
+/*EATE FUNCTION Main() RETURNS BOOLE*/
+	BEGIN
+		DECLARE start REFERENCE TO InputExceptionList.*[<];
+		DECLARE ErrorCode INTEGER;
+		DECLARE ErrorText,ErrorDesc CHARACTER;
+--		WHILE (lastmove(start)) DO
+--			IF (start.Number IS NOT NULL) THEN
+--				SET ErrorCode = start.Number;
+--				SET ErrorText = start.Text;
+--				SET ErrorDesc = SUBSTRING(start.Insert[6].Text AFTER 'a: ');
+--			END IF;
+--			MOVE start LASTCHILD;
+--		END WHILE;
+		CREATE FIELD OutputRoot.JSON.Data;
+		DECLARE OM REFERENCE TO OutputRoot.JSON.Data;
+		SET OM.Output.RespCde = start.Number;
+		SET OM.Output.Remarks = start.ParserException.ParserException.Insert[5].Text;--SUBSTRING(start.ParserException.ParserException.Insert[5].Text AFTER 'a: ');--ErrorDesc;
+		PROPAGATE TO TERMINAL 'out2';
+
+		SET OutputRoot.XMLNSC.errorDetails.messageFlowName = MessageFlowLabel;
+
+		--IF (ErrorCode = 5025) THEN
+			SET OutputRoot.XMLNSC.errorDetails.messageBody = Environment.Variables.InXml;
+	--	ELSE
+		--	SET OutputRoot.XMLNSC.errorDetails.messageBody = ErrorDesc;
+		-- END IF;
+		SET OutputRoot.XMLNSC.errorDetails.exceptionList = InputExceptionList;
+		SET OutputRoot.XMLNSC.errorDetails.msRefNo = Environment.variables.commonRefNo;
+		SET OutputRoot.XMLNSC.errorDetails.eventName = 'Consumption';
+		SET OutputRoot.XMLNSC.errorDetails.portCode = Environment.variables.portCode;
+		SET OutputRoot.XMLNSC.errorDetails.ErrorCode = start.Number;
+		SET OutputRoot.XMLNSC.errorDetails.ErrorText = SUBSTRING(start.ParserException.ParserException.Insert[5].Text AFTER 'cvc-maxLength-valid:');
+
+		PROPAGATE TO TERMINAL 'out1';
+
+		DECLARE crlf CHAR CAST(CAST('X''0A''' AS BLOB) AS CHAR CCSID 1208);
+		SET Environment.Subject ='Input Validation Error';
+		SET Environment.MailTemplate = 'Please find the details of the Request Below:-'||crlf||
+		'Error Details 	:'||COALESCE(ErrorDesc,'NA')||crlf||
+		'Message ID 	:'||COALESCE(Environment.Variables.Doctype,'NA')||crlf||
+		'Submission Date & Time 	:'||COALESCE(Environment.Variables.reqtime,'NA')||crlf||
+		'Kindly review the request and send it.'||crlf||
+		'Thanks & regards,'||crlf||
+		'Team PCS';
+		SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.To='rajeshs@portall.in';
+		SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.From='rajeshs@portall.in';
+		SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.Subject = Environment.Subject;
+		SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.Template=Environment.MailTemplate;
+		PROPAGATE TO TERMINAL 'out3';
+		RETURN FALSE;
+	END;

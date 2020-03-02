@@ -1,0 +1,49 @@
+CREATE COMPUTE MODULE PCS_CNFCNW_Failure_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		SET OutputRoot.XMLNSC.errorDetails.messageFlowName = MessageFlowLabel;
+		SET OutputRoot.XMLNSC.errorDetails.messageBody = Environment.Variables.InXML;
+		SET OutputRoot.XMLNSC.errorDetails.exceptionList = InputExceptionList;
+
+		DECLARE charPosCommonRefStart INTEGER POSITION('<CommonRefNumber>' IN Environment.Variables.InXML);
+		DECLARE charPosCommonRefEnd INTEGER POSITION('</CommonRefNumber>' IN Environment.Variables.InXML);
+		DECLARE commonRefLength INTEGER charPosCommonRefEnd - charPosCommonRefStart;
+		SET Environment.variables.RefNo = SUBSTRING(Environment.Variables.InXML FROM charPosCommonRefStart+17 FOR commonRefLength);
+
+		SET OutputRoot.XMLNSC.errorDetails.msRefNo = SUBSTRING(Environment.variables.RefNo BEFORE '<');
+		SET OutputRoot.XMLNSC.errorDetails.eventName = 'Consumption';
+
+		CALL GetPartyDetailsBySenderWithFolder(Environment.Variables.msgSender,'', Environment.Variables.PortDtls[]);
+
+		SET OutputRoot.XMLNSC.errorDetails.portCode = Environment.Variables.PortDtls[1].PortCode;
+
+		IF (EXISTS(InputExceptionList.RecoverableException.RecoverableException.RecoverableException.RecoverableException.ParserException.ParserException[])) THEN
+			SET OutputRoot.XMLNSC.errorDetails.ErrorCode = InputExceptionList.RecoverableException.RecoverableException.RecoverableException.RecoverableException.ParserException.ParserException.Number;
+			SET OutputRoot.XMLNSC.errorDetails.ErrorText = InputExceptionList.RecoverableException.RecoverableException.RecoverableException.RecoverableException.ParserException.ParserException.Text;
+		ELSEIF (EXISTS(InputExceptionList.RecoverableException.DatabaseException.DatabaseException.DatabaseException[])) THEN
+			SET OutputRoot.XMLNSC.errorDetails.ErrorCode = InputExceptionList.RecoverableException.DatabaseException.DatabaseException.DatabaseException.Number;
+			SET OutputRoot.XMLNSC.errorDetails.ErrorText = InputExceptionList.RecoverableException.DatabaseException.DatabaseException.DatabaseException.Insert[3].Text;
+		ELSEIF (EXISTS(InputExceptionList.RecoverableException.RecoverableException.RecoverableException[])) THEN
+			SET OutputRoot.XMLNSC.errorDetails.ErrorCode = InputExceptionList.RecoverableException.RecoverableException.RecoverableException.Number;
+			SET OutputRoot.XMLNSC.errorDetails.ErrorText = InputExceptionList.RecoverableException.RecoverableException.RecoverableException.Text;
+		ELSEIF (Environment.variables.xsdValFail = TRUE)THEN
+			SET OutputRoot.XMLNSC.errorDetails.ErrorCode = Environment.Variable.results5[1].ERROR_CODE;
+			SET OutputRoot.XMLNSC.errorDetails.ErrorText = Environment.Variable.results5[1].Message;
+		ELSE
+			SET OutputRoot.XMLNSC.errorDetails.ErrorCode = 'ERR02';
+			SET OutputRoot.XMLNSC.errorDetails.ErrorText = 'ESB exception occurred';
+		END IF;
+
+		SET Environment.variables.consumptionFlag = FALSE;
+		SET Environment.variables.ackURL = PASSTHRU('SELECT FTP_PATH AS URL FROM IPAOWNER.XX_TPCS_DOC_PORT_MAP WHERE SITE_ID = ? AND MSG_TYPE = ?;',Environment.variables.msgSender,'ACKAPI');
+		SET Environment.variables.AuditSeq = PASSTHRU('SELECT NEXT VALUE FOR IPAOWNER.TPCS_AUDIT_API_SEQ AS SEQ;');
+		INSERT INTO Database.PCSIBM.TIBM_LOG_AUDIT_API(API_Request_ID,API_Channel_ID,API_Request_Date,SITE_ID,MS_REF_NO,MSG_TYPE,MSG_DIRECTION,API_URL,API_TIMESTAMP,TRM_STATUS,PAYLOAD_IN,AUDITSEQ) VALUES(Environment.variables.requestId,Environment.variables.channelId,CURRENT_TIMESTAMP,Environment.variables.msgSender,Environment.variables.commonRefNo,'CNFCNW','INBOUND',Environment.variables.ackURL[1].URL,CURRENT_TIMESTAMP,'0',Environment.Variables.InXML,Environment.variables.AuditSeq[1].SEQ);
+		COMMIT;
+		SET Environment.variables.currentSeqValue = Environment.variables.AuditSeq[1].SEQ;
+
+	END;
+	CREATE PROCEDURE GetPartyDetailsBySenderWithFolder(IN senderID CHARACTER, IN p1 CHARACTER)
+	LANGUAGE DATABASE
+	DYNAMIC RESULT SETS 1
+	EXTERNAL NAME "dbo.GetPartyDetailsBySenderWithFolder";
+END MODULE;

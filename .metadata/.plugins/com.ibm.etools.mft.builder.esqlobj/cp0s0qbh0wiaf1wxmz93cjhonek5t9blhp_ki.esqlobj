@@ -1,0 +1,69 @@
+/*EATE FUNCTION Main() RETURNS BOOLE*/
+	BEGIN
+		SET OutputRoot.XMLNSC.auditDetails.RefNo = Environment.variables.commonRefNo;
+		DECLARE auditDtlsRef REFERENCE TO OutputRoot.XMLNSC.auditDetails;
+		SET auditDtlsRef.msgUID = UUIDASCHAR;
+		IF (Environment.variables.APICall = TRUE) THEN
+			SET auditDtlsRef.msgType = 'COEDOR_XML_API';
+			SET auditDtlsRef.portCode = Environment.variables.portCode;
+		ELSE
+			SET auditDtlsRef.msgType = 'COEDOR_XML_IN';
+			SET auditDtlsRef.portCode = SUBSTRING(Environment.variables.sftpPath AFTER 'PORTS/');
+			SET auditDtlsRef.portCode = SUBSTRING(auditDtlsRef.portCode BEFORE '/');
+		END IF;
+
+		SET auditDtlsRef.EVENT_NAME = 'Consumption';
+
+		SET auditDtlsRef.msgSender = Environment.variables.msgSender;
+		
+		IF (Environment.variables.APICall = TRUE) THEN
+			SET auditDtlsRef.fileName = 'NoFile';
+			SET auditDtlsRef.fileDirectory = 'APICall';
+			SET auditDtlsRef.MailId = 'NA';
+			SET auditDtlsRef.mobileNo = 'NA';
+		ELSE
+			SET auditDtlsRef.fileName = Environment.variables.filename;
+			SET auditDtlsRef.fileDirectory = Environment.variables.sftpPath;
+			SET auditDtlsRef.MailId = Environment.Variables.NresultSet2[1].Email_id;
+			SET auditDtlsRef.mobileNo = Environment.Variables.NresultSet2[1].Mobile;
+		END IF;
+
+		DECLARE ediStartTime CHARACTER Environment.variables.ediStartTime;
+		DECLARE mailStartTime CHARACTER Environment.variables.mailStartTime;
+		DECLARE mailEndTime CHARACTER Environment.variables.mailEndTime;
+		DECLARE dbStartTime CHARACTER CAST(Environment.variables.dbStartTime[1].DBSTARTTIME AS CHARACTER);
+		DECLARE dbEndTime CHARACTER CAST(Environment.variables.dbEndTime[1].DBENDTIME AS CHARACTER);
+		DECLARE SMSStartTime CHARACTER Environment.variables.SMSStartTime;
+
+		SET ediStartTime = REPLACE(ediStartTime,'TIMESTAMP ','');
+		SET ediStartTime = SUBSTRING(ediStartTime FROM 2 FOR 23);
+		SET auditDtlsRef.ediStartTime = ediStartTime;
+
+		SET mailStartTime = REPLACE(mailStartTime,'TIMESTAMP ','');
+		SET mailStartTime = SUBSTRING(mailStartTime FROM 2 FOR 23);
+		SET auditDtlsRef.mailStartTime = mailStartTime;
+
+		SET mailEndTime = REPLACE(mailEndTime,'TIMESTAMP ','');
+		SET mailEndTime = SUBSTRING(mailEndTime FROM 2 FOR 23);
+		SET auditDtlsRef.mailEndTime = mailEndTime;
+
+		SET SMSStartTime = REPLACE(SMSStartTime,'TIMESTAMP ','');
+		SET SMSStartTime = SUBSTRING(SMSStartTime FROM 2 FOR 23);
+		SET auditDtlsRef.SMSStartTime = SMSStartTime;
+
+		SET dbStartTime = REPLACE(dbStartTime,'TIMESTAMP ','');
+		SET dbStartTime = SUBSTRING(dbStartTime FROM 2 FOR 23);
+		SET auditDtlsRef.dbStartTime = dbStartTime;
+
+		SET dbEndTime = REPLACE(dbEndTime,'TIMESTAMP ','');
+		SET dbEndTime = SUBSTRING(dbEndTime FROM 2 FOR 23);
+		SET auditDtlsRef.dbEndTime = dbEndTime;
+		IF (Environment.variables.APICall = TRUE) THEN
+			SET Environment.variables.consumptionFlag = TRUE;
+			SET Environment.variables.ackURL = PASSTHRU('SELECT FTP_PATH AS URL FROM IPAOWNER.XX_TPCS_DOC_PORT_MAP WHERE SITE_ID = ? AND MSG_TYPE = ?;',Environment.variables.msgSender,'ACKAPI');
+			SET Environment.variables.AuditSeq = PASSTHRU('SELECT NEXT VALUE FOR IPAOWNER.TPCS_AUDIT_API_SEQ AS SEQ;');
+			INSERT INTO Database.PCSIBM.TIBM_LOG_AUDIT_API(API_Request_ID,API_Channel_ID,API_Request_Date,SITE_ID,MS_REF_NO,MSG_TYPE,MSG_DIRECTION,API_URL,API_TIMESTAMP,TRM_STATUS,PAYLOAD_IN,AUDITSEQ) VALUES(Environment.variables.requestId,Environment.variables.channelId,CURRENT_TIMESTAMP,Environment.variables.msgSender,Environment.variables.commonRefNo,'COEDOR','INBOUND',Environment.variables.ackURL[1].URL,CURRENT_TIMESTAMP,'0',Environment.Variables.InXML,Environment.variables.AuditSeq[1].SEQ);
+			COMMIT;
+			SET Environment.variables.currentSeqValue = Environment.variables.AuditSeq[1].SEQ;
+		END IF;
+	END;

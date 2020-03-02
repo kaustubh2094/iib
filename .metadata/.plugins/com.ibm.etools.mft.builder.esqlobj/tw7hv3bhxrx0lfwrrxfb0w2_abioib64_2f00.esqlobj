@@ -1,0 +1,55 @@
+/*EATE FUNCTION Main() RETURNS BOOLE*/
+	BEGIN
+		DECLARE start REFERENCE TO InputExceptionList.*[<];
+		DECLARE ErrorCode INTEGER;
+		DECLARE ErrorText CHARACTER;
+		DECLARE ErrDesc CHARACTER;
+		IF (Environment.variables.exception1 = TRUE) THEN
+			SET OutputRoot.JSON.Data.RespCde = 'ER001';
+			SET OutputRoot.JSON.Data.Remarks = 'Container number value is required.';
+			PROPAGATE TO TERMINAL 'out1';
+		ELSEIF (Environment.variables.exception2 = TRUE) THEN
+			SET OutputRoot.JSON.Data.RespCde = 'ER002';
+			SET OutputRoot.JSON.Data.Remarks = 'Valid upto value is required.';
+			PROPAGATE TO TERMINAL 'out1';
+		ELSEIF (Environment.variables.exception3 = TRUE) THEN
+			SET OutputRoot.JSON.Data.RespCde = 'ER003';
+			SET OutputRoot.JSON.Data.Remarks = 'Container ISO Code value is required.';
+			PROPAGATE TO TERMINAL 'out1';
+		ELSEIF (Environment.variables.exception4 = TRUE) THEN
+			SET OutputRoot.JSON.Data.RespCde = 'ER004';
+			SET OutputRoot.JSON.Data.Remarks = 'Container Seal Number value is required.';
+			PROPAGATE TO TERMINAL 'out1';
+		ELSEIF (Environment.variables.exception5 = TRUE) THEN
+			SET OutputRoot.JSON.Data.RespCde = 'ER005';
+			SET OutputRoot.JSON.Data.Remarks = 'Number of packages value is required.';
+			PROPAGATE TO TERMINAL 'out1';
+		ELSEIF (Environment.variables.exception6 = TRUE) THEN
+			SET OutputRoot.JSON.Data.RespCde = 'ER006';
+			SET OutputRoot.JSON.Data.Remarks = 'Package code value is required.';
+			PROPAGATE TO TERMINAL 'out1';
+		ELSE
+			WHILE lastmove(start) DO
+				IF start.Number IS NOT NULL THEN
+					SET ErrorCode = start.Number;
+					SET ErrorText = start.Text;
+				    SET ErrDesc = SUBSTRING(start.Insert[5].Text AFTER 'a: ');
+				END IF;
+				MOVE start LASTCHILD;
+			END WHILE;
+
+			CREATE FIELD OutputRoot.JSON.Data;
+			DECLARE OM REFERENCE TO OutputRoot.JSON.Data;
+			SET OM.Output.RespCde = ErrorCode;
+			SET OM.Output.Remarks = ErrorText;
+			PROPAGATE TO TERMINAL 'out1';
+		END IF;
+		
+		SET OutputRoot.XMLNSC.errorDetails.messageFlowName = MessageFlowLabel;
+		SET OutputRoot.XMLNSC.errorDetails.messageBody = InputRoot.XMLNSC;
+		SET OutputRoot.XMLNSC.errorDetails.exceptionList = InputExceptionList;
+		SET OutputRoot.XMLNSC.errorDetails.ErrorCode = ErrorCode;
+		SET OutputRoot.XMLNSC.errorDetails.ErrorText = ErrorText;
+		PROPAGATE TO TERMINAL 'out2';
+		RETURN FALSE;
+	END;

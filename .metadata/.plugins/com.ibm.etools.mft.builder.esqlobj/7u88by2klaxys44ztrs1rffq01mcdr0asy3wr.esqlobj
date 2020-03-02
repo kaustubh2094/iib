@@ -1,0 +1,118 @@
+/*EATE FUNCTION Main() RETURNS BOOLE*/
+	BEGIN
+		DECLARE currTime CHAR;
+		SET currTime = CURRENT_TIMESTAMP;
+
+		DECLARE TemplateEmailSdr, TemplateEmailInc ,SUBJECT, TemplateSMSSdr CHARACTER;
+		DECLARE TerminalEmail, RecipientlistDist, AgentEmail, AgentMobile, SMSDistList, TerminalMobile, TemplateSMSInc CHARACTER;
+		DECLARE RecieveCount INTEGER CARDINALITY (Environment.ReceivingParty[]);
+		DECLARE Recipientlist CHARACTER;
+		DECLARE K INTEGER;
+
+		DECLARE refNotif REFERENCE TO Environment.NOTIF;
+		MOVE refNotif FIRSTCHILD;
+
+		SET TerminalEmail = refNotif.TerminalEmail;
+		SET AgentEmail = refNotif.AgentEmail;
+		SET AgentMobile = refNotif.AgentMobile;
+		SET TerminalMobile = refNotif.TerminalMobile;
+
+		DECLARE crlf CHAR CAST(CAST('X''0A''' AS BLOB) AS CHAR CCSID 1208 );
+		SET TemplateEmailSdr = 'Dear '||COALESCE(refNotif.AgentName,'')||','||crlf||'The container stock report for vessel '||COALESCE(refNotif.VesselName,'')||' has been submitted by '||COALESCE(refNotif.PortAbbr,'')||'. The details of the report are as given below:'||crlf||crlf||
+		'IMO No.: '||COALESCE(refNotif.IMONo,'')||crlf||
+		'VCN: '||COALESCE(refNotif.VCN,'')||crlf||
+		'IGM No.: '||COALESCE(refNotif.IGMNumber,'')||crlf||
+		'Rotation No.: '||COALESCE(refNotif.RotationNumber,'')||crlf||
+		'Container No.: '||COALESCE(refNotif.ContainerNumber,'')||crlf||
+		'Receipt Date and Time: '||COALESCE(refNotif.ReceiptDate,'')||crlf||crlf||
+
+		'Please visit the PCS website for more details. '||crlf||crlf||
+		'Thanking You,'||crlf||
+		'Team PCS'||crlf;
+
+		SET TemplateEmailInc = 'Dear '||COALESCE(refNotif.PortAbbr,'')||','||crlf||crlf||
+		'The container stock report for vessel '||COALESCE(refNotif.VesselName,'')||' has been submitted to agent '||COALESCE(refNotif.AgentName,'')||'. The details of the report are as given below:'||crlf||crlf||
+		'IMO No.: '||COALESCE(refNotif.IMONo,'')||crlf||
+		'VCN: '||COALESCE(refNotif.VCN,'')||crlf||
+		'IGM No.: '||COALESCE(refNotif.IGMNumber,'')||crlf||
+		'Rotation No.: '||COALESCE(refNotif.RotationNumber,'')||crlf||
+		'Container No.: '||COALESCE(refNotif.ContainerNumber,'')||crlf||
+		'Receipt Date and Time: '||COALESCE(refNotif.ReceiptDate,'')||crlf||crlf||
+		'Please visit the PCS website for more details. '||crlf||crlf||
+		'Thanking You,'||crlf||
+		'Team PCS'||crlf;
+
+		SET TemplateSMSSdr=COALESCE(refNotif.PortAbbr,'')||' has released a new container stock report for vessel '||COALESCE(refNotif.VesselName,'')||crlf||
+		'-Team PCS'||crlf;
+
+		SET TemplateSMSInc= 'A new container stock report for vessel '||COALESCE(refNotif.VesselName,'')||' has been sent to ' ||COALESCE(refNotif.AgentName,'')||crlf||
+		'-Team PCS'||crlf;
+		
+
+		SET SUBJECT='New container stock report for vessel '||COALESCE(refNotif.VesselName,'')||' has been released';
+
+		SET K = 1;
+		WHILE K <= RecieveCount DO
+			IF K =1 THEN
+				SET Recipientlist=Environment.ReceivingParty[K].Email_id;
+			ELSE
+				SET Recipientlist=COALESCE(Recipientlist,'')||Environment.ReceivingParty[K].Email_id;
+			END IF;
+			SET Recipientlist=Recipientlist ||',';
+			SET K=K+1;
+		END WHILE ;			
+
+
+		IF LENGTH(TerminalEmail) > 0 THEN
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.PCS_Audit.Header=Environment.PCS_Audit.Header;
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.To=TerminalEmail;
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.From=SUBJECT;
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.Template=TemplateEmailInc;
+			PROPAGATE TO TERMINAL 'out2';
+		END IF;
+		IF LENGTH(AgentEmail) > 0 THEN
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.PCS_Audit.Header=Environment.PCS_Audit.Header;
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.To=AgentEmail;
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.From=SUBJECT;
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.Template=TemplateEmailSdr;
+			PROPAGATE TO TERMINAL 'out2';
+		END IF;
+
+		IF RecieveCount > 0 THEN
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.PCS_Audit.Header=Environment.PCS_Audit.Header;
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.To=Recipientlist ;
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.From=SUBJECT;
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.Template=TemplateEmailInc;
+			PROPAGATE TO TERMINAL 'out2';
+		END IF;
+
+		SET K = 1;
+		WHILE K <= RecieveCount DO
+			IF K =1 THEN
+				SET Recipientlist=Environment.ReceivingParty[K].Mobile;
+			ELSE
+				SET Recipientlist=COALESCE(Recipientlist,'')||Environment.ReceivingParty[K].Mobile;
+			END IF;
+			SET Recipientlist=Recipientlist ||',';
+			SET K=K+1;
+		END WHILE ;
+
+		IF RecieveCount > 0 THEN
+			SET OutputRoot.JSON.Data.Notification.SMS.PCS_Audit.Header=Environment.PCS_Audit.Header;
+			SET OutputRoot.JSON.Data.Notification.SMS.MobileNo=Recipientlist;
+			SET OutputRoot.JSON.Data.Notification.SMS.message=TemplateSMSInc;
+			PROPAGATE TO TERMINAL 'out1';
+		END IF;
+		IF LENGTH(TerminalMobile) > 0 THEN
+			SET OutputRoot.JSON.Data.Notification.SMS.PCS_Audit.Header=Environment.PCS_Audit.Header;
+			SET OutputRoot.JSON.Data.Notification.SMS.MobileNo=TerminalMobile;
+			SET OutputRoot.JSON.Data.Notification.SMS.message=TemplateSMSInc;
+			PROPAGATE TO TERMINAL 'out1';
+		END IF;
+		IF LENGTH(AgentMobile) > 0 THEN
+			SET OutputRoot.JSON.Data.Notification.SMS.PCS_Audit.Header=Environment.PCS_Audit.Header;
+			SET OutputRoot.JSON.Data.Notification.SMS.MobileNo=AgentMobile;
+			SET OutputRoot.JSON.Data.Notification.SMS.message=TemplateSMSSdr;
+			PROPAGATE TO TERMINAL 'out1';
+		END IF;
+	END;	

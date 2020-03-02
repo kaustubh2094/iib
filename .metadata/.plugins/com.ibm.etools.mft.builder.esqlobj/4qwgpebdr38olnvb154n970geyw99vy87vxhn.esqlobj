@@ -1,0 +1,93 @@
+CREATE COMPUTE MODULE AGDORDCT_XML_API_processFile_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE InXML CHARACTER;
+		SET InXML = Environment.Variables.InXML;
+		
+		DECLARE charPosCommonRefStart INTEGER POSITION('<CommonRefNumber>' IN Environment.Variables.InXML);
+		DECLARE charPosCommonRefEnd INTEGER POSITION('</CommonRefNumber>' IN Environment.Variables.InXML);
+		DECLARE commonRefLength INTEGER charPosCommonRefEnd - charPosCommonRefStart;
+		SET Environment.variables.commonRefNo = SUBSTRING(Environment.Variables.InXML FROM charPosCommonRefStart+17 FOR commonRefLength);
+		SET Environment.variables.commonRefNo = SUBSTRING(Environment.variables.commonRefNo BEFORE '<');
+		DECLARE charPosSenderIdStart INTEGER POSITION('<SenderID>' IN Environment.Variables.InXML);
+		DECLARE charPosSenderIdEnd INTEGER POSITION('</SenderID>' IN Environment.Variables.InXML);
+		DECLARE senderIdLength INTEGER charPosSenderIdEnd - charPosSenderIdStart;
+		SET Environment.variables.msgSender = SUBSTRING(Environment.Variables.InXML FROM charPosSenderIdStart+10 FOR senderIdLength);
+		SET Environment.variables.msgSender = SUBSTRING(Environment.variables.msgSender BEFORE '<');
+	
+		DECLARE charPosPortCodeStart INTEGER POSITION('<PortCode>' IN Environment.Variables.InXML);
+		DECLARE charPosPortCodeEnd INTEGER POSITION('</PortCode>' IN Environment.Variables.InXML);
+		DECLARE portCodeLength INTEGER charPosPortCodeEnd - charPosPortCodeStart;
+		SET Environment.variables.portCode = SUBSTRING(Environment.Variables.InXML FROM charPosPortCodeStart+10 FOR portCodeLength);
+		SET Environment.variables.portCode = SUBSTRING(Environment.variables.portCode BEFORE '<');
+		SET Environment.variables.dbStartTime = PASSTHRU('SELECT CURRENT_TIMESTAMP AS DBSTARTTIME;');
+		
+		IF (CONTAINS(Environment.Variables.InXML,'<MessageType>4</MessageType>')) THEN
+			CALL EDI_XInsAGDORDCT_Extend(InXML, Environment.Variable.results1[], Environment.Variable.results2[],Environment.Variable.results3[],Environment.Variable.results4[], Environment.Variable.results5[],Environment.Variable.results6[],Environment.Variable.results7[],Environment.Variable.results8[],Environment.Variable.results9[], Environment.Variable.results10[],Environment.Variable.results11[],Environment.Variable.results12[]);
+			COMMIT;
+		ELSE
+			CALL EDI_XInsAGDORDCT(InXML, Environment.Variable.results1[], Environment.Variable.results2[],Environment.Variable.results3[],Environment.Variable.results4[], Environment.Variable.results5[],Environment.Variable.results6[],Environment.Variable.results7[],Environment.Variable.results8[],Environment.Variable.results9[], Environment.Variable.results10[],Environment.Variable.results11[],Environment.Variable.results12[]);
+			COMMIT;
+		END IF;		
+		
+		SET Environment.variables.dbEndTime = PASSTHRU('SELECT CURRENT_TIMESTAMP AS DBENDTIME;');
+		IF (Environment.Variable.results5[1].ErrorMessage = 'Success')OR (Environment.Variable.results6[1].ErrorMessage = 'Success') OR (Environment.Variable.results7[1].ErrorMessage = 'Success')OR (Environment.Variable.results8[1].ErrorMessage = 'Success')OR (Environment.Variable.results9[1].ErrorMessage = 'Success') OR (Environment.Variable.results10[1].ErrorMessage = 'Success') OR (Environment.Variable.results11[1].ErrorMessage = 'Success') OR (Environment.Variable.results12[1].ErrorMessage = 'Success') THEN
+			SET Environment.variables.consumptionFlag = TRUE;
+			SET Environment.variables.agdordCommonRef = COALESCE(Environment.Variable.results2[1].TransactionID,Environment.Variable.results5[1].TransactionID,Environment.Variable.results6[1].TransactionID,Environment.Variable.results7[1].TransactionID,Environment.Variable.results8[1].TransactionID,Environment.Variable.results9[1].TransactionID,Environment.Variable.results10[1].TransactionID,Environment.Variable.results11[1].TransactionID,Environment.Variable.results12[1].TransactionID);			
+			SET OutputRoot.XMLNSC.PCS.Common_Ref = COALESCE(Environment.Variable.results2[1].TransactionID,Environment.Variable.results5[1].TransactionID,Environment.Variable.results6[1].TransactionID,Environment.Variable.results7[1].TransactionID,Environment.Variable.results8[1].TransactionID,Environment.Variable.results9[1].TransactionID,Environment.Variable.results10[1].TransactionID,Environment.Variable.results11[1].TransactionID,Environment.Variable.results12[1].TransactionID);
+			SET OutputRoot.XMLNSC.PCS.Action_In = 'AGDORDCT';
+			PROPAGATE TO TERMINAL 'out';
+			
+--			DECLARE charPosDONumStart INTEGER POSITION('<DeliveryOrderNumber>' IN Environment.Variables.InXML);
+--			DECLARE charPosDONumEnd INTEGER POSITION('</DeliveryOrderNumber>' IN Environment.Variables.InXML);
+--			DECLARE DONumLength INTEGER charPosDONumEnd - charPosDONumStart;
+--			SET Environment.variables.DONum = SUBSTRING(Environment.Variables.InXML FROM charPosDONumStart+21 FOR DONumLength);
+--			SET Environment.variables.DONum = SUBSTRING(Environment.variables.DONum BEFORE '<');
+--			
+--			DECLARE charPosbillLadNumStart INTEGER POSITION('<BillLadingNo>' IN Environment.Variables.InXML);
+--			DECLARE charPosbillLadNumEnd INTEGER POSITION('</BillLadingNo>' IN Environment.Variables.InXML);
+--			DECLARE billLadNumLength INTEGER charPosbillLadNumEnd - charPosbillLadNumStart;
+--			SET Environment.variables.billLadNum = SUBSTRING(Environment.Variables.InXML FROM charPosbillLadNumStart+14 FOR billLadNumLength);
+--			SET Environment.variables.billLadNum = SUBSTRING(Environment.variables.billLadNum BEFORE '<');
+--			
+--			DECLARE charPosVCNStart INTEGER POSITION('<VCN>' IN Environment.Variables.InXML);
+--			DECLARE charPosVCNEnd INTEGER POSITION('</VCN>' IN Environment.Variables.InXML);
+--			DECLARE VCNLength INTEGER charPosVCNEnd - charPosVCNStart;
+--			SET Environment.variables.vcn = SUBSTRING(Environment.Variables.InXML FROM charPosVCNStart+5 FOR VCNLength);
+--			SET Environment.variables.vcn = SUBSTRING(Environment.variables.vcn BEFORE '<');
+--			
+--			DECLARE charPosIGMStart INTEGER POSITION('<IGMNumber>' IN Environment.Variables.InXML);
+--			DECLARE charPosIGMEnd INTEGER POSITION('</IGMNumber>' IN Environment.Variables.InXML);
+--			DECLARE IGMLength INTEGER charPosIGMEnd - charPosIGMStart;
+--			SET Environment.variables.igm = COALESCE(SUBSTRING(Environment.Variables.InXML FROM charPosIGMStart+5 FOR IGMLength),'');
+--			SET Environment.variables.igm = COALESCE(SUBSTRING(Environment.variables.igm BEFORE '<'),'');
+--			
+--			SET OutputRoot.XMLNSC.eDOEmail.body.deliveryOrderumber = Environment.variables.DONum;
+--			SET OutputRoot.XMLNSC.eDOEmail.body.billLadNum = Environment.variables.billLadNum;
+--			SET OutputRoot.XMLNSC.eDOEmail.body.vcn = Environment.variables.vcn;
+--			SET OutputRoot.XMLNSC.eDOEmail.body.igm = Environment.variables.igm;
+--			PROPAGATE TO TERMINAL 'out2';
+	        RETURN FALSE;	
+		ELSE
+			SET Environment.variables.consumptionFlag = FALSE;
+			SET Environment.variables.ackURL = PASSTHRU('SELECT FTP_PATH AS URL FROM IPAOWNER.XX_TPCS_DOC_PORT_MAP WHERE SITE_ID = ? AND MSG_TYPE = ?;',Environment.variables.msgSender,'ACKAPI');
+		    SET Environment.variables.AuditSeq = PASSTHRU('SELECT NEXT VALUE FOR IPAOWNER.TPCS_AUDIT_API_SEQ AS SEQ;');
+		    INSERT INTO Database.PCSIBM.TIBM_LOG_AUDIT_API(API_Request_ID,API_Channel_ID,API_Request_Date,SITE_ID,MS_REF_NO,MSG_TYPE,MSG_DIRECTION,API_URL,API_TIMESTAMP,TRM_STATUS,PAYLOAD_IN,AUDITSEQ,ERR_CODE,ERR_DESC) VALUES(Environment.variables.requestId,Environment.variables.channelId,CURRENT_TIMESTAMP,Environment.variables.msgSender,Environment.variables.commonRefNo,'AGDORDCT','INBOUND',Environment.variables.ackURL[1].URL,CURRENT_TIMESTAMP,'0',Environment.Variables.InXML,Environment.variables.AuditSeq[1].SEQ,COALESCE(Environment.Variable.results2[1].ErrorCode,Environment.Variable.results5[1].ErrorCode,Environment.Variable.results6[1].ErrorCode,Environment.Variable.results7[1].ErrorCode,Environment.Variable.results8[1].ErrorCode,Environment.Variable.results9[1].ErrorCode,Environment.Variable.results10[1].ErrorCode,Environment.Variable.results11[1].ErrorCode,Environment.Variable.results12[1].ErrorCode,''),COALESCE(Environment.Variable.results2[1].ErrorMessage,Environment.Variable.results5[1].ErrorMessage,Environment.Variable.results6[1].ErrorMessage,Environment.Variable.results7[1].ErrorMessage,Environment.Variable.results8[1].ErrorMessage,Environment.Variable.results9[1].ErrorMessage,Environment.Variable.results10[1].ErrorMessage,Environment.Variable.results11[1].ErrorMessage,Environment.Variable.results12[1].ErrorMessage,''));
+		    INSERT INTO Database.PCSIBM.TIBM_LOG_ERROR(Executiongroup,Brokername,FlowName,ErrorCode,ErrorText,ErrorDate,MsgBody,XMLDATA,CREATED_DT,MS_REF_NO,EVENT_NAME,PORT_CODE) VALUES ('PCS_WEBSER','PCS_UAT_II','AGDORDCT_XML_API',COALESCE(Environment.Variable.results2[1].ErrorCode,Environment.Variable.results5[1].ErrorCode,Environment.Variable.results6[1].ErrorCode,Environment.Variable.results7[1].ErrorCode,Environment.Variable.results8[1].ErrorCode,Environment.Variable.results9[1].ErrorCode,Environment.Variable.results10[1].ErrorCode,Environment.Variable.results11[1].ErrorCode,Environment.Variable.results12[1].ErrorCode,''),COALESCE(Environment.Variable.results2[1].ErrorMessage,Environment.Variable.results5[1].ErrorMessage,Environment.Variable.results6[1].ErrorMessage,Environment.Variable.results7[1].ErrorMessage,Environment.Variable.results8[1].ErrorMessage,Environment.Variable.results9[1].ErrorMessage,Environment.Variable.results10[1].ErrorMessage,Environment.Variable.results11[1].ErrorMessage,Environment.Variable.results12[1].ErrorMessage,''),CURRENT_TIMESTAMP,'AGDORDCT_XML_API',Environment.Variables.InXML,CURRENT_TIMESTAMP,Environment.variables.commonRefNo,'Consumption',Environment.variables.portCode);		    
+		    COMMIT;
+		    SET Environment.variables.currentSeqValue = Environment.variables.AuditSeq[1].SEQ;
+			PROPAGATE TO TERMINAL 'out1';
+	    	RETURN FALSE;
+		END IF;	
+	END;
+	CREATE PROCEDURE EDI_XInsAGDORDCT(IN T CHARACTER)
+	LANGUAGE DATABASE
+	DYNAMIC RESULT SETS 12
+	EXTERNAL NAME "dbo.EDI_XInsAGDORDCT";
+	
+	CREATE PROCEDURE EDI_XInsAGDORDCT_Extend(IN T CHARACTER)
+	LANGUAGE DATABASE
+	DYNAMIC RESULT SETS 12
+	EXTERNAL NAME "dbo.EDI_XInsAGDORDCT_Extend";
+	
+END MODULE;

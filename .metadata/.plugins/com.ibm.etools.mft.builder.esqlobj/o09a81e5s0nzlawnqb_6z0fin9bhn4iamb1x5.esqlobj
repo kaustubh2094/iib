@@ -1,0 +1,83 @@
+/*EATE FUNCTION Main() RETURNS BOOLE*/
+	BEGIN
+		DECLARE crlf CHAR CAST(CAST('X''0A''' AS BLOB) AS CHAR CCSID 1208);
+		SET Environment.TemplatePA='Dear '||COALESCE(Environment.Agent.PortAbbr,'NA')||' ,'||crlf||
+		'The equipment interchange report for dates '||COALESCE(Environment.Agent.ArrivalDates,'')|| ' has been released to agent '||COALESCE(Environment.Agent.AgentName,'')||'.'||crlf||
+		'Please visit the PCS website for more details.'||crlf||
+		'Thanking You,'||crlf||
+		'Team PCS'||crlf;
+
+		SET Environment.TemplateSA='Dear '||COALESCE(Environment.Agent.SenderName,'NA')||','||crlf||
+		'The equipment interchange report for dates ' ||COALESCE(Environment.Agent.ArrivalDates,'')||' has been released by '||COALESCE(Environment.Agent.PortAbbr,'NA')||'.'||crlf||
+		'Please visit the PCS website for more details.'||crlf||
+		'Thanking You,'||crlf||
+		'Team PCS'||crlf;
+
+
+		SET Environment.messagePA = 'A new equipment interchange report for vessel '||COALESCE(Environment.Agent.VesselName,'NA')||'  has been sent to agent '||COALESCE(Environment.Agent.AgentName,'NA')||' .'||crlf||
+		'-Team PCS'||crlf;
+
+		SET Environment.messageSA=COALESCE(Environment.Agent.PortAbbr,'NA')||' has released a new equipment interchange report for vessel '||COALESCE(Environment.Agent.VesselName,'NA')||' .'||crlf||
+		'-Team PCS'||crlf;
+
+		IF Environment.RecievingParty.Email_id <> '' THEN
+			DECLARE RecieveCount INTEGER CARDINALITY (Environment.RecievingParty[]);
+			DECLARE Recipientlist CHARACTER;
+			DECLARE K INTEGER 1;
+			WHILE K <= RecieveCount DO
+				IF K =1 THEN
+					SET Recipientlist=Environment.RecievingParty[K].Email_id;
+				ELSE
+					SET Recipientlist=COALESCE(Recipientlist,'')||Environment.RecievingParty[K].Email_id;
+
+				END IF;
+				SET Recipientlist=Recipientlist ||',';
+
+				SET K=K+1;
+			END WHILE ;
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.PCS_Audit.Header=Environment.PCS_Audit.Header;
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.To=Recipientlist;
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.From='New equipment interchange report for vessel '||COALESCE(Environment.Agent.VesselName,'NA')||'  has been released'; --'SUBJECT';--
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.Template=Environment.TemplatePA;
+			PROPAGATE TO TERMINAL 'out1';
+		end if;
+		IF Environment.Agent.AgentEmail <> '' THEN
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.PCS_Audit.Header=Environment.PCS_Audit.Header;
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.To=Environment.PAEmail;
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.From='New equipment interchange report for vessel '||COALESCE(Environment.Agent.VesselName,'NA')||'  has been released'; --'SUBJECT';--
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.Template=Environment.TemplateSA;
+
+			PROPAGATE TO TERMINAL 'out1';
+
+		end if;
+		IF Environment.RecievingParty.Mobile <> '' THEN
+			DECLARE RecieveCount INTEGER CARDINALITY (Environment.RecievingParty[]);
+			DECLARE Recipientlist CHARACTER;
+			DECLARE K INTEGER 1;
+
+			WHILE K <= RecieveCount DO
+				IF K =1 THEN
+					SET Recipientlist=Environment.RecievingParty[K].Mobile;
+				ELSE
+					SET Recipientlist=COALESCE(Recipientlist,'')||Environment.RecievingParty[K].Mobile;
+
+				END IF;
+				SET Recipientlist=Recipientlist ||',';
+
+				SET K=K+1;
+			END WHILE ;
+			SET OutputRoot.JSON.Data.Notification.SMS.PCS_Audit.Header=Environment.PCS_Audit.Header;
+			SET OutputRoot.JSON.Data.Notification.SMS.MobileNo=Recipientlist;
+			SET OutputRoot.JSON.Data.Notification.SMS.message=Environment.messageSA;
+			PROPAGATE TO TERMINAL 'out2';
+		END IF;
+		IF Environment.Agent.AgentMobile <> '' THEN
+			SET OutputRoot.JSON.Data.Notification.SMS.PCS_Audit.Header=Environment.PCS_Audit.Header;
+			SET OutputRoot.JSON.Data.Notification.SMS.MobileNo=Environment.PAPhone;
+			SET OutputRoot.JSON.Data.Notification.SMS.message=Environment.messagePA;
+			PROPAGATE TO TERMINAL 'out2' ;
+		END IF;
+		RETURN TRUE;
+	END;
+
+	

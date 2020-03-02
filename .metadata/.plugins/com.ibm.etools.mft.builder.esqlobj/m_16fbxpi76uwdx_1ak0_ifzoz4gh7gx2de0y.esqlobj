@@ -1,0 +1,61 @@
+CREATE COMPUTE MODULE PCS_CONTAINER_API_routeMessage_JSONToXML_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE incField CHARACTER;
+		DECLARE bF BLOB;
+		SET Environment.Variables.reqtime = CAST(CURRENT_TIMESTAMP AS CHARACTER CCSID 1208);
+		SET Environment.Variables.reqtime = SUBSTRING(Environment.Variables.reqtime AFTER 'TIMESTAMP');
+		SET incField = CAST(InputRoot.BLOB.BLOB AS CHARACTER CCSID 1208);
+		
+		SET Environment.variables.channelId = SUBSTRING(incField AFTER '"Channel_ID"');
+		SET Environment.variables.channelId = SUBSTRING(Environment.variables.channelId AFTER '"');
+		SET Environment.variables.channelId = SUBSTRING(Environment.variables.channelId BEFORE '"');
+		
+		SET Environment.variables.requestId = SUBSTRING(incField AFTER '"Request_ID"');
+		SET Environment.variables.requestId = SUBSTRING(Environment.variables.requestId AFTER '"');
+		SET Environment.variables.requestId = SUBSTRING(Environment.variables.requestId BEFORE '"');
+		
+		SET Environment.variables.serviceId = SUBSTRING(incField AFTER '"Service_ID"');
+		SET Environment.variables.serviceId = SUBSTRING(Environment.variables.serviceId AFTER '"');
+		SET Environment.variables.serviceId = SUBSTRING(Environment.variables.serviceId BEFORE '"');
+		
+		IF (CONTAINS(incField,'?>')) THEN
+			SET incField = SUBSTRING(incField AFTER '?>');
+			SET incField = SUBSTRING(incField BEFORE '"');
+		ELSE
+			SET incField = SUBSTRING(incField AFTER '"XML":"');
+			SET incField = SUBSTRING(incField BEFORE '"');
+		END IF;
+		SET Environment.Variables.InXml = incField;
+		DECLARE charPosDocTypeStart INTEGER POSITION('<DocumentType>' IN incField);
+		DECLARE charPosDocTypeEnd INTEGER POSITION('</DocumentType>' IN incField);
+		DECLARE docTypeLength INTEGER charPosDocTypeEnd - charPosDocTypeStart;
+		SET Environment.Variables.Doctype = SUBSTRING(incField FROM charPosDocTypeStart+14 FOR docTypeLength);
+		SET Environment.Variables.Doctype = SUBSTRING(Environment.Variables.Doctype BEFORE '<');
+		
+		DECLARE charPosCommonRefStart INTEGER POSITION('<CommonRefNumber>' IN incField);
+		DECLARE charPosCommonRefEnd INTEGER POSITION('</CommonRefNumber>' IN incField);
+		DECLARE commonRefLength INTEGER charPosCommonRefEnd - charPosCommonRefStart;
+		SET Environment.variables.commonRefNo = SUBSTRING(incField FROM charPosCommonRefStart+17 FOR commonRefLength);
+		SET Environment.variables.commonRefNo = SUBSTRING(Environment.variables.commonRefNo BEFORE '<');
+
+		DECLARE charPosssendStart INTEGER POSITION('<SenderID>' IN incField);
+		DECLARE charPosssendEnd INTEGER POSITION('</SenderID>' IN incField);
+		DECLARE sendidLength INTEGER charPosssendEnd - charPosssendStart;
+		SET Environment.Variables.senderid = SUBSTRING(incField FROM charPosssendStart+10 FOR sendidLength);
+		SET Environment.Variables.senderid = SUBSTRING(Environment.Variables.senderid BEFORE '<');
+		
+		DECLARE charPosPortCodeStart INTEGER POSITION('<PortCode>' IN incField);
+		DECLARE charPosPortCodeEnd INTEGER POSITION('</PortCode>' IN incField);
+		DECLARE portCodeLength INTEGER charPosPortCodeEnd - charPosPortCodeStart;
+		SET Environment.variables.portCode = SUBSTRING(incField FROM charPosPortCodeStart+10 FOR portCodeLength);
+		SET Environment.variables.portCode = SUBSTRING(Environment.variables.portCode BEFORE '<');
+		
+		SET bF = CAST(incField AS BLOB CCSID 1208);
+		DECLARE inCCSID INT InputProperties.CodedCharSetId;
+		DECLARE inEncoding INT InputProperties.Encoding;
+		CREATE LASTCHILD OF OutputLocalEnvironment DOMAIN('XMLNSC') PARSE(bF,inEncoding,inCCSID,'BLOB','XMLNSC');
+		SET OutputRoot.XMLNSC = OutputLocalEnvironment.XMLNSC;
+		RETURN TRUE;
+	END;
+END MODULE;

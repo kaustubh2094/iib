@@ -1,0 +1,68 @@
+CREATE COMPUTE MODULE COPRAR_XML_API_auditDetails_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN		
+		DECLARE charPosCommonRefStart INTEGER POSITION('<CommonRefNumber>' IN Environment.Variables.InXML);
+		DECLARE charPosCommonRefEnd INTEGER POSITION('</CommonRefNumber>' IN Environment.Variables.InXML);
+		DECLARE commonRefLength INTEGER charPosCommonRefEnd - charPosCommonRefStart;
+		SET OutputRoot.XMLNSC.auditDetails.RefNo = SUBSTRING(Environment.Variables.InXML FROM charPosCommonRefStart+17 FOR commonRefLength);
+		SET OutputRoot.XMLNSC.auditDetails.RefNo = SUBSTRING(OutputRoot.XMLNSC.auditDetails.RefNo BEFORE '<');
+		SET Environment.variables.commonRefNo = OutputRoot.XMLNSC.auditDetails.RefNo;
+		DECLARE auditDtlsRef REFERENCE TO OutputRoot.XMLNSC.auditDetails;
+		SET auditDtlsRef.msgUID = UUIDASCHAR;
+		SET auditDtlsRef.msgType = 'COPRAR_XML_API';
+		
+		DECLARE charPosPortCodeStart INTEGER POSITION('<PortCode>' IN Environment.Variables.InXML);
+		DECLARE charPosPortCodeEnd INTEGER POSITION('</PortCode>' IN Environment.Variables.InXML);
+		DECLARE portCodeLength INTEGER charPosPortCodeEnd - charPosPortCodeStart;
+		SET auditDtlsRef.portCode = SUBSTRING(Environment.Variables.InXML FROM charPosPortCodeStart+10 FOR portCodeLength);
+		SET auditDtlsRef.portCode = SUBSTRING(auditDtlsRef.portCode BEFORE '<');	
+			
+		SET auditDtlsRef.EVENT_NAME = 'Consumption';
+		DECLARE charPosSenderIdStart INTEGER POSITION('<SenderID>' IN Environment.Variables.InXML);
+		DECLARE charPosSenderIdEnd INTEGER POSITION('</SenderID>' IN Environment.Variables.InXML);
+		DECLARE senderIdLength INTEGER charPosSenderIdEnd - charPosSenderIdStart;
+		SET auditDtlsRef.msgSender = SUBSTRING(Environment.Variables.InXML FROM charPosSenderIdStart+10 FOR senderIdLength);
+		SET auditDtlsRef.msgSender = SUBSTRING(auditDtlsRef.msgSender BEFORE '<');
+		SET Environment.variables.msgSender = auditDtlsRef.msgSender;
+		SET auditDtlsRef.fileName = Environment.variables.agdordCommonRef;
+		SET auditDtlsRef.fileDirectory = 'APICall';
+		SET auditDtlsRef.MailId = 'NA';
+		SET auditDtlsRef.mobileNo = 'NA';
+
+		DECLARE ediStartTime CHARACTER Environment.variables.ediStartTime;
+		DECLARE mailStartTime CHARACTER Environment.variables.mailStartTime;
+		DECLARE mailEndTime CHARACTER Environment.variables.mailEndTime;
+		DECLARE dbStartTime CHARACTER CAST(Environment.variables.dbStartTime[1].DBSTARTTIME AS CHARACTER);
+		DECLARE dbEndTime CHARACTER CAST(Environment.variables.dbEndTime[1].DBENDTIME AS CHARACTER);
+		DECLARE SMSStartTime CHARACTER Environment.variables.SMSStartTime;
+
+		SET ediStartTime = REPLACE(ediStartTime,'TIMESTAMP ','');
+		SET ediStartTime = SUBSTRING(ediStartTime FROM 2 FOR 23);
+		SET auditDtlsRef.ediStartTime = ediStartTime;
+
+		SET mailStartTime = REPLACE(mailStartTime,'TIMESTAMP ','');
+		SET mailStartTime = SUBSTRING(mailStartTime FROM 2 FOR 23);
+		SET auditDtlsRef.mailStartTime = mailStartTime;
+
+		SET mailEndTime = REPLACE(mailEndTime,'TIMESTAMP ','');
+		SET mailEndTime = SUBSTRING(mailEndTime FROM 2 FOR 23);
+		SET auditDtlsRef.mailEndTime = mailEndTime;
+
+		SET SMSStartTime = REPLACE(SMSStartTime,'TIMESTAMP ','');
+		SET SMSStartTime = SUBSTRING(SMSStartTime FROM 2 FOR 23);
+		SET auditDtlsRef.SMSStartTime = SMSStartTime;
+
+		SET dbStartTime = REPLACE(dbStartTime,'TIMESTAMP ','');
+		SET dbStartTime = SUBSTRING(dbStartTime FROM 2 FOR 23);
+		SET auditDtlsRef.dbStartTime = dbStartTime;
+
+		SET dbEndTime = REPLACE(dbEndTime,'TIMESTAMP ','');
+		SET dbEndTime = SUBSTRING(dbEndTime FROM 2 FOR 23);
+		SET auditDtlsRef.dbEndTime = dbEndTime;
+	    SET Environment.variables.ackURL = PASSTHRU('SELECT FTP_PATH AS URL FROM IPAOWNER.XX_TPCS_DOC_PORT_MAP WHERE SITE_ID = ? AND MSG_TYPE = ?;',Environment.variables.msgSender,'ACKAPI');
+	    SET Environment.variables.AuditSeq = PASSTHRU('SELECT NEXT VALUE FOR IPAOWNER.TPCS_AUDIT_API_SEQ AS SEQ;');
+		INSERT INTO Database.PCSIBM.TIBM_LOG_AUDIT_API(API_Request_ID,API_Channel_ID,API_Request_Date,SITE_ID,MS_REF_NO,MSG_TYPE,MSG_DIRECTION,API_URL,API_TIMESTAMP,TRM_STATUS,PAYLOAD_IN,AUDITSEQ) VALUES(Environment.variables.requestId,Environment.variables.channelId,CURRENT_TIMESTAMP,Environment.variables.msgSender,Environment.variables.commonRefNo,'COPRAR','INBOUND',Environment.variables.ackURL[1].URL,CURRENT_TIMESTAMP,'0',Environment.Variables.InXML,Environment.variables.AuditSeq[1].SEQ);
+		COMMIT;
+		SET Environment.variables.currentSeqValue = Environment.variables.AuditSeq[1].SEQ;
+	END;
+END MODULE;

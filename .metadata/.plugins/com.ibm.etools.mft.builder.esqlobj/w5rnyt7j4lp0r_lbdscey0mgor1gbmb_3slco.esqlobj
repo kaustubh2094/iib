@@ -1,0 +1,19 @@
+CREATE COMPUTE MODULE COEDOR_XML_API_COEDOR_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE blobdata BLOB;
+		IF FIELDNAME(InputRoot.XMLNSC.(XMLNSC.Element)[1]) IS NOT NULL THEN
+			SET blobdata = ASBITSTREAM(InputRoot.XMLNSC.coedor.payload);
+			SET OutputRoot.BLOB.BLOB = blobdata;
+			SET Environment.MQ = InputRoot.MQMD;
+			SET Environment.variables.APICall = TRUE;
+			SET Environment.variables.channelId = InputRoot.XMLNSC.coedor.channelId;
+			SET Environment.variables.requestId = InputRoot.XMLNSC.coedor.requestId;
+			SET Environment.variables.serviceId = InputRoot.XMLNSC.coedor.serviceId;
+		ELSE
+			SET Environment.variables.APICall = FALSE;
+			SET OutputRoot.BLOB.BLOB = InputRoot.BLOB.BLOB;
+		END IF;
+		RETURN TRUE;
+	END;	
+END MODULE;
