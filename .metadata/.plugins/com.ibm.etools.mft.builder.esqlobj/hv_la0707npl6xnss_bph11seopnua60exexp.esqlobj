@@ -1,0 +1,101 @@
+/*EATE FUNCTION Main() RETURNS BOOLE*/
+	BEGIN
+		SET Environment.PCS_Audit.Details.Message.EDI_START_TS = CURRENT_TIMESTAMP;
+		CALL EDI_GetNotifyDetails4Customs(Environment.RSET5.TransactionID,'CHPOE11',Environment.Data1[],Environment.Data2[]);
+		DECLARE currTime CHAR;
+		SET currTime = CURRENT_TIMESTAMP;
+
+		SET Environment.PCS_Audit.Header.DB_SP_END_TS = CURRENT_TIMESTAMP;
+		SET Environment.PCS_Audit.Details.Message.EDI_END_TS= CURRENT_TIMESTAMP;
+		DECLARE TemplateEmailSdr, TemplateEmailInc ,SUBJECT, TemplateSMSSdr CHARACTER;
+		DECLARE RecipientlistSdr, RecipientlistDist, SMSDistList, SMSSdrNo, TemplateSMSInc CHARACTER;
+		DECLARE RecieveCount INTEGER CARDINALITY (Environment.ReceivingParty[]);
+		DECLARE Recipientlist CHARACTER;
+		DECLARE K INTEGER;
+
+		DECLARE notifData REFERENCE TO Environment.Data;
+		MOVE notifData FIRSTCHILD;
+		IF LASTMOVE(notifData ) THEN
+			SET RecipientlistSdr =notifData.TerminalEmail;
+			SET SMSSdrNo = notifData.TerminalMobile;
+		END IF;
+
+		DECLARE crlf CHAR CAST(CAST('X''0A''' AS BLOB) AS CHAR CCSID 1208 );
+		SET TemplateEmailSdr='Dear '||COALESCE(notifData.AgentName,'')||','||COALESCE(notifData.PortAbbr,'')||crlf||crlf||
+		'The rotation no. for vessel '||COALESCE(notifData.VesselName,'')||','||crlf||
+		'has been allotted by Indian Customs '||crlf|| 'The details are provided below.'||crlf||crlf||
+
+		'IMO No: '||COALESCE(notifData.IMONumber,'')||crlf||
+		'VCN: '||COALESCE(notifData.VCN,'')||crlf||
+		'IGM No.: '||COALESCE(notifData.IGMNumber,'')||crlf||
+		'Rotation No.: '||COALESCE(notifData.RotationNumber,'')||crlf||
+		'Rotation Date.: '||COALESCE(notifData.RotationDateFormatted,'')||crlf||
+		'Allotment Date and Time: '||COALESCE(notifData.SubmissionTime,'')||crlf||crlf||
+
+		'Please visit IPA-PCS website for more details. '||crlf||crlf||
+		'-Team PCS'||crlf;
+
+
+		SET TemplateSMSSdr='Rotation No. for vessel '||COALESCE(notifData.VesselName,'')||','||crlf||
+		'has been allotted by Customs. '||crlf||
+		'Allotted No. is '||COALESCE(notifData.AllottedNo,'')||crlf||
+		'-Team PCS'||crlf;
+
+
+		SET SUBJECT='Rotation No. for vessel '||COALESCE(notifData.VesselName,'') ||crlf|| ' has been allotted' ;
+
+
+		IF LENGTH(RecipientlistSdr) > 0 THEN
+			-- CALL CopyMessageHeaders();
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.PCS_Audit.Header=Environment.PCS_Audit.Header;
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.To=RecipientlistSdr;
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.From=SUBJECT;
+			SET OutputRoot.JSON.Data.JMBNotification.EmailDetails.Template=TemplateEmailSdr;
+			PROPAGATE TO TERMINAL 'out2';
+		END IF;
+
+		IF LENGTH(SMSSdrNo) > 0 THEN
+			-- CALL CopyMessageHeaders();
+			SET OutputRoot.JSON.Data.Notification.SMS.PCS_Audit.Header=Environment.PCS_Audit.Header;
+			SET OutputRoot.JSON.Data.Notification.SMS.MobileNo=SMSSdrNo;
+			SET OutputRoot.JSON.Data.Notification.SMS.message=TemplateSMSSdr;
+			PROPAGATE TO TERMINAL 'out1';
+		END IF;
+		-- CALL CopyMessageHeaders();
+		Set OutputRoot.XML.PCS_Audit.Header.MS_REF_NO = Environment.PCS_Audit.Header.MS_REF_NO;
+		DECLARE logreff REFERENCE TO OutputRoot.XML.PCS_Audit.Header;
+		Set logreff.MSG_UID =Environment.PCS_Audit.Header.MSG_UID;
+		Set logreff.MSG_TYPE =Environment.PCS_Audit.Header.MSG_TYPE;
+		Set logreff.MSG_TIME =Environment.PCS_Audit.Header.MSG_TIME;
+		Set logreff.MSG_SNDR=Environment.PCS_Audit.Header.MSG_SNDR;
+		Set logreff.PORT_CODE=Environment.PCS_Audit.Header.PORT_CODE;
+		SET logreff.EVENT_NAME = 'Consumption';
+
+		Set OutputRoot.XML.PCS_Audit.Details.Message.EDI_START_TS= Environment.PCS_Audit.Details.Message.EDI_START_TS;
+		DECLARE msgreff REFERENCE TO OutputRoot.XML.PCS_Audit.Details.Message;
+		Set msgreff.EDI_END_TS=Environment.PCS_Audit.Header.DB_SP_END_TS;
+		Set msgreff.FILE_NAME=Environment.PCS_Audit.Details.Message.FILE_NAME;
+		Set msgreff.EDI_DIRECTORY_INFO=Environment.PCS_Audit.Details.Message.EDI_DIRECTORY_INFO;
+
+		Set OutputRoot.XML.PCS_Audit.Details.Database.DB_SP_START_TS=Environment.PCS_Audit.Database.DB_SP_START_TS;
+		DECLARE dbreff REFERENCE TO OutputRoot.XML.PCS_Audit.Details.Database;
+		Set dbreff.DB_SP_END_TS=Environment.PCS_Audit.Database.DB_SP_END_TS;
+		Set dbreff.DB_SP_REMARK=Environment.PCS_Audit.Database.DB_SP_REMARK;
+		Set dbreff.DB_SP_STATUS=Environment.PCS_Audit.Database.DB_SP_STATUS;
+
+		IF FIELDVALUE(Environment.PCS_Audit.Database.DB_SP_REMARK) = 'S' THEN
+			SET dbreff.DB_SP_REMARK='SUCCESS';
+			SET dbreff.DB_SP_STATUS='Executed successfully';
+		END IF;
+		IF FIELDVALUE(Environment.PCS_Audit.Database.DB_SP_REMARK) = 'F' THEN
+			SET dbreff.DB_SP_REMARK='FAILED';
+			SET dbreff.DB_SP_STATUS='Error';
+		END IF;
+		PROPAGATE TO TERMINAL 'out';
+
+
+	END;
+	CREATE PROCEDURE EDI_GetNotifyDetails4Customs(IN p1 CHARACTER,IN p2 CHARACTER)
+	LANGUAGE DATABASE
+	DYNAMIC RESULT SETS 2
+	EXTERNAL NAME "dbo.EDI_GetNotifyDetails4Customs";

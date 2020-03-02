@@ -1,0 +1,40 @@
+CREATE COMPUTE MODULE CUSTOM_11E_API_ConstructRequest
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		CREATE FIELD OutputRoot.JSON.Data.ReqHeader;
+		SET OutputRoot.JSON.Data.ReqHeader.Channel_ID = 'IndianPCS';
+		SET OutputRoot.JSON.Data.ReqHeader.Service_ID = '112312';
+		SET OutputRoot.JSON.Data.ReqHeader.Request_ID = InputRoot.XMLNSC.Data.CommonRef;
+		SET Environment.ReqDate = PASSTHRU('SELECT CURRENT_TIMESTAMP AS WebReq');
+		SET OutputRoot.JSON.Data.ReqHeader.Request_Date = CAST(Environment.ReqDate[1].WebReq AS CHARACTER);
+		SET OutputRoot.JSON.Data.ReqHeader.Request_Date = REPLACE(OutputRoot.JSON.Data.ReqHeader.Request_Date,'TIMESTAMP ','');
+		SET OutputRoot.JSON.Data.ReqHeader.Request_Date = SUBSTRING(OutputRoot.JSON.Data.ReqHeader.Request_Date FROM 2 FOR 10);
+		SET OutputRoot.JSON.Data.ReqHeader.Request_Date = REPLACE(OutputRoot.JSON.Data.ReqHeader.Request_Date,'-','');
+		SET OutputRoot.JSON.Data.ReqBody.XML = InputRoot.XMLNSC.Data.cust11;
+		SET OutputLocalEnvironment.Destination.HTTP.RequestURL = InputRoot.XMLNSC.Data.URL; --Environment.XMLNSC.List[j].FTP_PATH;
+		SET Environment.WebReq = OutputRoot.JSON.Data.ReqHeader.Request_Date;
+		SET Environment.url = InputRoot.XMLNSC.Data.URL;
+		SET Environment.commonref = InputRoot.XMLNSC.Data.CommonRef;
+		SET Environment.portcode = InputRoot.XMLNSC.Data.PortCode;
+		SET Environment.variables.AuditSeq = PASSTHRU('SELECT NEXT VALUE FOR IPAOWNER.TPCS_AUDIT_API_SEQ AS SEQ;');
+		INSERT INTO Database.PCSIBM.TIBM_LOG_AUDIT_API(API_Request_ID,API_Channel_ID,API_Request_Date,SITE_ID,MS_REF_NO,MSG_TYPE,MSG_DIRECTION,API_URL,API_TIMESTAMP,TRM_STATUS,PAYLOAD_OUT,AUDITSEQ)
+		VALUES(InputRoot.XMLNSC.Data.CommonRef,'IndianPCS',CURRENT_TIMESTAMP,Environment.portcode,InputRoot.XMLNSC.Data.CommonRef,'CHPOE11','OUTBOUND',Environment.url,CURRENT_TIMESTAMP,'0',InputRoot.XMLNSC.Data.cust11,Environment.variables.AuditSeq[1].SEQ);
+		COMMIT;
+		RETURN TRUE;
+
+	END;
+
+	CREATE PROCEDURE CopyMessageHeaders() BEGIN
+		DECLARE I INTEGER 1;
+		DECLARE J INTEGER;
+		SET J = CARDINALITY(InputRoot.*[]);
+		WHILE I < J DO
+			SET OutputRoot.*[I] = InputRoot.*[I];
+			SET I = I + 1;
+		END WHILE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		SET OutputRoot = InputRoot;
+	END;
+END MODULE;

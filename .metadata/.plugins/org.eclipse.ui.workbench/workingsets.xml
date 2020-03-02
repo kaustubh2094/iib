@@ -23,5 +23,11 @@
 <workingSet editPageId="com.ibm.etools.mft.navigator.BrokerWorkingSet.AppLib" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1583132552423_7" label="[PCS_ExceptionLog]" name="[PCS_ExceptionLog]">
 <item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/PCS_ExceptionLog" type="4"/>
 </workingSet>
+<workingSet editPageId="com.ibm.etools.mft.navigator.BrokerWorkingSet.AppLib" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1583139271556_8" label="[CHPOE11]" name="[CHPOE11]">
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/CHPOE11" type="4"/>
+</workingSet>
+<workingSet editPageId="com.ibm.etools.mft.navigator.BrokerWorkingSet.AppLib" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1583139271564_9" label="[CHPOE11_API]" name="[CHPOE11_API]">
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/CHPOE11_API" type="4"/>
+</workingSet>
 <workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1583132393560_0" label="Window Working Set" name="Aggregate for window 1583132393559"/>
 </workingSetManager>
