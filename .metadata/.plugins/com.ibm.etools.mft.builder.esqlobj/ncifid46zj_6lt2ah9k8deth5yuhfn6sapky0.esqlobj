@@ -1,0 +1,180 @@
+CREATE COMPUTE MODULE ExceptionLog_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		CALL getErrorLog();
+		return false;
+	END;
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		DECLARE exceptionRef REFERENCE TO InputExceptionList;
+		MOVE exceptionRef LASTCHILD;
+		MOVE exceptionRef LASTCHILD;
+		MOVE exceptionRef LASTCHILD;
+		WHILE LASTMOVE(exceptionRef) DO
+			SET Environment.Function=exceptionRef.Function;
+			SET Environment.Text=exceptionRef.Text; -- Propagating a message to the failure terminal
+			MOVE exceptionRef LASTCHILD;
+		END WHILE;
+		SET Environment.Text=exceptionRef.Text; -- Propagating a message to the failure terminal
+	END;
+
+	CREATE PROCEDURE getErrorLog()
+	BEGIN
+		IF LENGTH(Environment.FILE_NAME) < 1 THEN
+			SET Environment.FILE_NAME = InputLocalEnvironment.File.Name;
+		END IF;
+		DECLARE httpStatusLine CHARACTER InputRoot.HTTPResponseHeader."X-Original-HTTP-Status-Line";
+		DECLARE httpStatusCode CHARACTER InputRoot.HTTPResponseHeader."X-Original-HTTP-Status-Code";
+		IF httpStatusCode<>'200' THEN
+			SET Environment.Error_Info.TimeStamp=CURRENT_TIMESTAMP;
+			SET Environment.Error_Info.HTTPErrorCode=httpStatusCode;
+			SET Environment.Error_Info.Reason=httpStatusLine;
+			SET OutputRoot.JSON.Data.Error_Info.TimeStamp=CURRENT_TIMESTAMP;
+			SET OutputRoot.JSON.Data.Error_Info.HTTPErrorCode=httpStatusCode;
+			SET OutputRoot.JSON.Data.Error_Info.Reason=httpStatusLine;
+			IF STARTSWITH(httpStatusCode,'3') THEN
+				SET Environment.Error_Info.ErrorDescription='HTTP redirection error ';
+				SET OutputRoot.JSON.Data.Error_Info.ErrorDescription='HTTP redirection error ';
+			ELSEIF STARTSWITH(httpStatusCode ,'4') THEN
+				SET Environment.Error_Info.ErrorDescription='HTTP Client Side error';
+				SET OutputRoot.JSON.Data.Error_Info.ErrorDescription='HTTP Client Side error';
+			ELSEIF STARTSWITH(httpStatusCode ,'5') THEN
+				SET Environment.Error_Info.ErrorDescription='HTTP Server Side error';
+				SET OutputRoot.JSON.Data.Error_Info.ErrorDescription='HTTP Server Side error';
+			END IF;
+		ELSE
+			DECLARE exceptionRef REFERENCE TO InputExceptionList.*[1];
+			SET Environment.Error_Info.ExceptionType=FIELDNAME(exceptionRef);
+			SET OutputRoot.JSON.Data.Error_Info.ExceptionType=FIELDNAME(exceptionRef);
+			WHILE LASTMOVE(exceptionRef) DO
+				IF exceptionRef.Number is NOT NULL THEN
+					SET Environment.Error_Info.ExceptionDesc=exceptionRef.Text;
+					SET Environment.Error_Info.ExceptionType=FIELDNAME(exceptionRef);
+				ELSE
+					IF FIELDVALUE(exceptionRef)<>'' AND LENGTH(FIELDVALUE(exceptionRef))>15 THEN
+						SET Environment.Error_Info.ExceptionDesc=FIELDVALUE(exceptionRef);
+					END IF;
+				END IF;
+				MOVE exceptionRef LASTCHILD;
+			END WHILE;
+			DECLARE exceptionType CHARACTER Environment.Error_Info.ExceptionType;
+			DECLARE exceptionDesc CHARACTER Environment.Error_Info.ExceptionDesc;
+
+			IF exceptionType='SocketTimeoutException' THEN
+				SET OutputRoot.JSON.Data.Error_Info.TimeStamp=CURRENT_TIMESTAMP;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorCode='BIP1701E';
+				SET OutputRoot.JSON.Data.Error_Info.Reason=exceptionType;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorDescription=exceptionDesc;
+			ELSEIF exceptionType='DatabaseException' THEN
+				SET OutputRoot.JSON.Data.Error_Info.TimeStamp=CURRENT_TIMESTAMP;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorCode='BIP1702E';
+				SET OutputRoot.JSON.Data.Error_Info.Reason=exceptionType;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorDescription=exceptionDesc;
+			ELSEIF exceptionType='RecoverableException' THEN
+				SET OutputRoot.JSON.Data.Error_Info.TimeStamp=CURRENT_TIMESTAMP;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorCode='BIP1703E';
+				SET OutputRoot.JSON.Data.Error_Info.Reason=exceptionType;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorDescription=exceptionDesc;
+			ELSEIF exceptionType='UserException' THEN
+				SET OutputRoot.JSON.Data.Error_Info.TimeStamp=CURRENT_TIMESTAMP;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorCode='BIP1704E';
+				SET OutputRoot.JSON.Data.Error_Info.Reason=exceptionType;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorDescription=exceptionDesc;
+			ELSEIF exceptionType='FatalException' THEN
+				SET OutputRoot.JSON.Data.Error_Info.TimeStamp=CURRENT_TIMESTAMP;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorCode='BIP1705E';
+				SET OutputRoot.JSON.Data.Error_Info.Reason=exceptionType;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorDescription=exceptionDesc;
+			ELSEIF exceptionType='ConfigurationException' THEN
+				SET OutputRoot.JSON.Data.Error_Info.TimeStamp=CURRENT_TIMESTAMP;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorCode='BIP1706E';
+				SET OutputRoot.JSON.Data.Error_Info.Reason=exceptionType;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorDescription=exceptionDesc;
+			ELSEIF exceptionType='ConversionException' THEN
+				SET OutputRoot.JSON.Data.Error_Info.TimeStamp=CURRENT_TIMESTAMP;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorCode='BIP1707E';
+				SET OutputRoot.JSON.Data.Error_Info.Reason=exceptionType;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorDescription=exceptionDesc;
+			ELSEIF exceptionType='SocketException' THEN
+				SET OutputRoot.JSON.Data.Error_Info.TimeStamp=CURRENT_TIMESTAMP;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorCode='BIP1708E';
+				SET OutputRoot.JSON.Data.Error_Info.Reason=exceptionType;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorDescription=exceptionDesc;
+			ELSEIF exceptionType='CastException' THEN
+				SET OutputRoot.JSON.Data.Error_Info.TimeStamp=CURRENT_TIMESTAMP;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorCode='BIP1709E';
+				SET OutputRoot.JSON.Data.Error_Info.Reason=exceptionType;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorDescription=exceptionDesc;
+			ELSEIF exceptionType='MessageException' THEN
+				SET OutputRoot.JSON.Data.Error_Info.TimeStamp=CURRENT_TIMESTAMP;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorCode='BIP1710E';
+				SET OutputRoot.JSON.Data.Error_Info.Reason=exceptionType;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorDescription=exceptionDesc;
+			ELSEIF exceptionType='ParserException' THEN
+				SET OutputRoot.JSON.Data.Error_Info.TimeStamp=CURRENT_TIMESTAMP;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorCode='BIP1711E';
+				SET OutputRoot.JSON.Data.Error_Info.Reason=exceptionType;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorDescription= exceptionDesc;
+			ELSEIF exceptionType='SecurityException' THEN
+				SET OutputRoot.JSON.Data.Error_Info.TimeStamp=CURRENT_TIMESTAMP;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorCode='BIP1712E';
+				SET OutputRoot.JSON.Data.Error_Info.Reason=exceptionType;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorDescription=exceptionDesc;
+			ELSEIF exceptionType='SqlException' THEN
+				SET OutputRoot.JSON.Data.Error_Info.TimeStamp=CURRENT_TIMESTAMP;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorCode='BIP1713E';
+				SET OutputRoot.JSON.Data.Error_Info.Reason=exceptionType;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorDescription=exceptionDesc;
+			ELSEIF exceptionType='UnknownException' THEN
+				SET OutputRoot.JSON.Data.Error_Info.TimeStamp=CURRENT_TIMESTAMP;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorCode='BIP1714E';
+				SET OutputRoot.JSON.Data.Error_Info.Reason=exceptionType;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorDescription=exceptionDesc;
+			ELSE
+				SET OutputRoot.JSON.Data.Error_Info.TimeStamp=CURRENT_TIMESTAMP;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorCode='BIP01ERR';
+				SET OutputRoot.JSON.Data.Error_Info.Reason='Technical Failure'; --exceptionType;
+				SET OutputRoot.JSON.Data.Error_Info.ErrorDescription='Unknown Exception'; --exceptionDesc;
+			END IF;
+		END IF;
+		PROPAGATE TO TERMINAL 'out';
+
+		DECLARE CT CHARACTER;
+		SET CT = CURRENT_TIMESTAMP;
+		DECLARE crlf CHAR CAST(CAST('X''0A''' AS BLOB) AS CHAR CCSID 1208);
+
+		DECLARE start REFERENCE TO InputExceptionList.*[<];
+		DECLARE ErrorCode,I,a INTEGER 1;
+		DECLARE InsertCount INTEGER;
+		DECLARE ErrorText CHAR;
+		DECLARE staticValue CHARACTER;
+		WHILE lastmove(start) DO
+			IF start.Number IS NOT NULL THEN
+				SET ErrorCode = start.Number;
+				SET ErrorText = start.Text;
+				SET InsertCount = CARDINALITY(start.Insert[]);
+				WHILE a <= InsertCount DO
+					SET Environment.Variable.Text[a] = start.Insert[a].Text;
+					SET a = a+1;
+				END WHILE;
+				SET a = 1;
+			END IF;
+			MOVE start LASTCHILD; --- To fetch the last child of the exception tree.
+		END WHILE;
+		SET OutputRoot.XML.MQI_ERRORS.UserExceptionTree.Executiongroup = ExecutionGroupLabel;
+		SET OutputRoot.XML.MQI_ERRORS.UserExceptionTree.Brokername = BrokerName;
+		SET OutputRoot.XML.MQI_ERRORS.UserExceptionTree.FlowName = MessageFlowLabel;
+		SET OutputRoot.XML.MQI_ERRORS.UserExceptionTree.ErrorCode = ErrorCode;
+		SET OutputRoot.XML.MQI_ERRORS.UserExceptionTree.ErrorText = ErrorText;
+		SET OutputRoot.XML.MQI_ERRORS.TIMESTAMP = CAST(CT as CHARACTER FORMAT 'yyyy/MM/dd');
+		IF Environment.MESSAGE_FORMAT = 'JSON' THEN
+			SET OutputRoot.XML.MQI_ERRORS.MsgBody = CAST(BITSTREAM(InputBody) AS CHAR CCSID 1208)||crlf;
+		END IF;
+		IF LENGTH( Environment.TRANSACTION_ID) <> 0 THEN
+			SET OutputRoot.XML.MQI_ERRORS.TRANSACTION_ID = CAST(Environment.TRANSACTION_ID AS CHAR CCSID 1208) ;
+		ELSEIF LENGTH(Environment.FILE_NAME) <> 0 THEN
+			SET OutputRoot.XML.MQI_ERRORS.FILE_NAME = Environment.FILE_NAME;
+		END IF;
+		SET OutputRoot.XML.MQI_ERRORS."ExceptionList" = InputExceptionList;
+		propagate to TERMINAL 'out1';
+	END;
+END MODULE;
