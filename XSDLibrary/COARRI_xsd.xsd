@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!-- Copyright 2007 Crimsonlogic Pte Ltd; BaseLine:3.0; Revised Version:3.1 [Changes for ContianerLineCode]  --><xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:PCS-CMN="PCS_Common_Types">
+	<xsd:import namespace="PCS_Common_Types" schemaLocation="PCS_CommonTypes.xsd"/>
+	<xsd:element name="ContLoadingNDischargeOder" type="ContLoadingNDischargeOderType"/>
+	<xsd:complexType name="ContLoadingNDischargeOderType">
+		<xsd:sequence>
+			<xsd:element name="DocumentHeader" type="PCS-CMN:DocumentHeaderType"/>
+			<xsd:element name="DocumentDetails" type="DocumentDetailsTypeCoarri"/>
+			<xsd:element name="DocumentSummary" type="PCS-CMN:DocumentSummaryType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="DocumentDetailsTypeCoarri">
+		<xsd:sequence>
+			<xsd:element name="COARRIHeader" type="COARRIHeaderType"/>
+			<xsd:element name="COARRIDetails" type="COARRIDetailsSummaryType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="COARRIHeaderType">
+		<xsd:sequence>
+			<xsd:element name="VCN" type="PCS-CMN:VCNType"/>
+			<xsd:element name="IMONumber" type="PCS-CMN:CodeIDNameTextType"/>
+			<xsd:element name="CallSign" type="PCS-CMN:CodeIDNameTextType"/>
+			<xsd:element name="TOCode" type="PCS-CMN:StakeholderIDTextType"/>
+			<xsd:element name="VesselAgentCode" type="PCS-CMN:AgencyType"/>
+			<xsd:element minOccurs="0" name="IGMNumber" type="PCS-CMN:CustomNumberType"/>
+			<xsd:element minOccurs="0" name="IGMDate" type="PCS-CMN:DateType"/>
+			<xsd:element minOccurs="0" name="RotationNumber" type="PCS-CMN:CustomNumberType"/>
+			<xsd:element minOccurs="0" name="RotationNumberDate" type="PCS-CMN:DateType"/>
+			<xsd:element name="VesselFlag" type="PCS-CMN:CountryCodeType"/>
+			<xsd:element name="NoOfContainer" type="PCS-CMN:SpecificBerthType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="COARRIDetailsSummaryType">
+		<xsd:sequence>
+			<xsd:element maxOccurs="unbounded" name="COARRIItem" type="COARRIDetailsType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="COARRIDetailsType">
+		<xsd:sequence>
+			<xsd:element name="EquipmentStatusCode" type="PCS-CMN:Char3CodeType"/>
+			<xsd:element name="ContainerNumber" type="PCS-CMN:ContainerNumberType"/>
+			<xsd:element name="CustomsContSealNumber" type="PCS-CMN:StakeholderIDTextType"/>
+			<xsd:element minOccurs="0" name="ShipperContainerSealNumber" type="PCS-CMN:StakeholderIDTextType"/>
+			<xsd:element name="CACode" type="PCS-CMN:AgencyType"/>
+			<xsd:element minOccurs="0" name="ContLineCode" type="PCS-CMN:AgencyType"/>
+			<xsd:element minOccurs="0" name="ContISOCode" type="PCS-CMN:ISOCodeType"/>
+			<xsd:element name="ContClasssificationCode" type="PCS-CMN:Char3CodeType"/>
+			<xsd:element name="ICDIndicator" type="PCS-CMN:BooleanType"/>
+			<xsd:element minOccurs="0" name="IGMLineNumber" type="PCS-CMN:CustomSubLineNumberType"/>
+			<xsd:element minOccurs="0" name="IGMSubLineNumber" type="PCS-CMN:CustomSubLineNumberType"/>
+			<xsd:element minOccurs="0" name="SBNo" type="PCS-CMN:PassportNumberType"/>
+			<xsd:element minOccurs="0" name="SBDate" type="PCS-CMN:DateType"/>
+			<xsd:element minOccurs="0" name="CShippingDateTime" type="PCS-CMN:DateType"/>
+			<xsd:element minOccurs="0" name="CLandDateTime" type="PCS-CMN:DateType"/>
+			<xsd:element minOccurs="0" name="ContainerDamageIndicator" type="PCS-CMN:Char3CodeType"/>
+			<xsd:element minOccurs="0" name="ContainerDamageDesc" type="PCS-CMN:DescType"/>
+			<xsd:element name="BerthingDateTime" type="PCS-CMN:DateTimeType"/>
+			<xsd:element name="SealStatus" type="PCS-CMN:Char3CodeType"/>
+			<xsd:element minOccurs="0" name="DimensionCode" type="PCS-CMN:Char3CodeType"/>
+			<xsd:element minOccurs="0" name="OverDimLength" type="PCS-CMN:GrabCapacityType"/>
+			<xsd:element minOccurs="0" name="OverDimWidth" type="PCS-CMN:GrabCapacityType"/>
+			<xsd:element minOccurs="0" name="OverDimHeight" type="PCS-CMN:GrabCapacityType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

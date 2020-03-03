@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?><MessageBroker name="CHPOE11">
+  <XSDCollection href="platform:/resource/CHPOE11/CHPOE11.xsd" prefix="" targetNamespace="">
+    <element href="platform:/resource/CHPOE11/CHPOE11.xsd#//CHPOE11Payload;XSDElementDeclaration" name="CHPOE11Payload"/>
+  </XSDCollection>
+</MessageBroker>

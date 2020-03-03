@@ -1,0 +1,56 @@
+CREATE COMPUTE MODULE Get_REQCNG_FileGenerate
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		IF (CONTAINS(Environment.Variables.result2.SFTP_PATH,'http')) THEN
+			DECLARE outputBlob BLOB ASBITSTREAM(InputRoot.XMLNSC, 549,1208);
+			DECLARE ReplaceCarriageReturn BLOB X'0d0a';
+			
+			SET outputBlob = REPLACE(outputBlob, ReplaceCarriageReturn);
+			SET Environment.Variables.charData = CAST(outputBlob AS CHARACTER CCSID 1208);
+--			SET OutputRoot.XMLNSC = xmlBeautify(Environment.Variables.charData);	
+--			SET OutputRoot.XMLNSC.root = SUBSTRING(OutputRoot.XMLNSC AFTER '?>');
+--			DECLARE stringOut BLOB;
+--			SET stringOut = CAST(OutputRoot.XMLNSC.root as BLOB CCSID 1208);
+--		
+--			SET OutputRoot.BLOB.BLOB = stringOut;
+			SET Environment.APICALL = TRUE;
+--			SET reqcnpapi = CAST(InputRoot.BLOB.BLOB AS CHARACTER CCSID 1208);
+			CREATE FIELD OutputRoot.XMLNSC.data;
+			SET OutputRoot.XMLNSC.data.payload = Environment.Variables.charData;
+			SET OutputRoot.XMLNSC.data.url = Environment.Variables.result2.SFTP_PATH;
+			SET OutputRoot.XMLNSC.data.comref = Environment.Variables.result1.CommonRefNumber;
+			SET OutputRoot.XMLNSC.data.siteid = Environment.Variables.result1.SenderID;
+			PROPAGATE TO TERMINAL 'out1';
+			RETURN FALSE;
+		ELSEIF (EXISTS(InputRoot.XMLNSC[]))THEN	
+		DECLARE Blobb BLOB;
+		SET Blobb = ASBITSTREAM(InputRoot.XMLNSC);
+		SET Environment.Variables.charData = CAST(Blobb AS CHARACTER CCSID 1208);
+		SET OutputRoot.XMLNSC = xmlBeautify(Environment.Variables.charData);
+		SET OutputLocalEnvironment.Destination.File.Remote.ServerDirectory = Environment.Variables.result2[1].SFTP_PATH;
+		SET OutputLocalEnvironment.Destination.File.Name = 'REQCNG_'||Environment.Variables.result1[1].CommonRefNumber||'.xml';
+		SET OutputRoot.BLOB.BLOB = CAST(OutputRoot.XMLNSC AS BLOB CCSID 1208);
+		END IF;
+		
+		SET Environment.variables.fileName = OutputLocalEnvironment.Destination.File.Name;
+		SET Environment.variables.fileDirectory = OutputLocalEnvironment.Destination.File.Remote.ServerDirectory;
+--		RETURN TRUE;
+	END;
+
+	CREATE PROCEDURE CopyMessageHeaders() BEGIN
+		DECLARE I INTEGER 1;
+		DECLARE J INTEGER;
+		SET J = CARDINALITY(InputRoot.*[]);
+		WHILE I < J DO
+			SET OutputRoot.*[I] = InputRoot.*[I];
+			SET I = I + 1;
+		END WHILE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		SET OutputRoot = InputRoot;
+	END;
+	CREATE PROCEDURE xmlBeautify( IN unformattedXML CHARACTER) RETURNS CHARACTER LANGUAGE JAVA
+	EXTERNAL NAME "com.portall.xmlBeautify.XmlBeautifier.prettyFormat";
+
+END MODULE;

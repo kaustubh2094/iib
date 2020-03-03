@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!-- Copyright 07 Crimsonlogic Pte Ltd; Version : 3.1--><xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:PCS-CMN="PCS_Common_Types">
+	<xsd:import namespace="PCS_Common_Types" schemaLocation="PCS_CommonTypes.xsd"/>
+	<xsd:element name="VesselMovement" type="VesselMovementType"/>
+	<xsd:complexType name="VesselMovementType">
+		<xsd:sequence>
+			<xsd:element name="DocumentHeader" type="PCS-CMN:DocumentHeaderType"/>
+			<xsd:element name="DocumentDetails" type="DocumentDetailsTypeVESDEP"/>
+			<xsd:element name="DocumentSummary" type="PCS-CMN:DocumentSummaryType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="DocumentDetailsTypeVESDEP">
+		<xsd:sequence>
+			<xsd:element name="VesselMovementDetailsVESDEP" type="VesselMovementDetailsVESDEPType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="VesselMovementDetailsVESDEPType">
+		<xsd:sequence>
+			<xsd:element name="RecordType" type="PCS-CMN:RecordType"/>
+			<xsd:element minOccurs="0" name="BerthNumber" type="PCS-CMN:BerthType"/>
+			<xsd:element name="VCN" type="PCS-CMN:VCNType"/>
+			<xsd:element name="IMONumber" type="PCS-CMN:CodeIDNameTextType"/>
+			<xsd:element name="CallSign" type="PCS-CMN:CodeIDNameTextType"/>
+			<xsd:element name="VoyageNumber" type="PCS-CMN:CodeIDNameTextType"/>
+			<xsd:element name="TOOrDOckCode" type="PCS-CMN:StakeholderIDTextType"/>
+			<xsd:element minOccurs="0" name="VesselNameVESDEP" type="PCS-CMN:VesselNameType"/>
+			<xsd:element minOccurs="0" name="CountryOfVesselVESDEP" type="PCS-CMN:CountryCodeType"/>
+			<xsd:element minOccurs="0" name="SACode" type="PCS-CMN:AgencyType"/>
+			<xsd:element minOccurs="0" name="SLCode" type="PCS-CMN:AgencyType"/>
+			<xsd:element minOccurs="0" name="RotationNumberVESDEP" type="PCS-CMN:CustomNumberType"/>
+			<xsd:element minOccurs="0" name="RotationDateVESDEP" type="PCS-CMN:DateType"/>
+			<xsd:element minOccurs="0" name="PortClearanceNumberVESDEP" type="PCS-CMN:ContainerAgentCodeType"/>
+			<xsd:element minOccurs="0" name="PortClearanceDateVESDEP" type="PCS-CMN:DateType"/>
+			<xsd:element minOccurs="0" name="UnitOfQuantityVESDEP" type="PCS-CMN:Char3CodeType"/>
+			<xsd:element minOccurs="0" name="TotalWeightOfConsignmentVESDEP" type="PCS-CMN:QuantityType"/>
+			<xsd:element minOccurs="0" name="PortOfLoadingVESDEP" type="PCS-CMN:PortEquipmentCodeType"/>
+			<xsd:element minOccurs="0" name="DateTimeOfDepartureVESDEP" type="PCS-CMN:DateTimeType"/>
+			<xsd:element name="NextPortOfCallVESDEP" type="PCS-CMN:PortEquipmentCodeType"/>
+			<xsd:element minOccurs="0" name="BerthingStatusVESDEP" type="PCS-CMN:Char1CodeType"/>
+			<xsd:element minOccurs="0" name="BerthingSubStatusVESDEP" type="PCS-CMN:Char1CodeType"/>
+			<xsd:element minOccurs="0" name="Group" type="PCS-CMN:GroupType"/>
+			<xsd:element minOccurs="0" name="NatureOfCargoVESDEP" type="PCS-CMN:Char2CodeType"/>
+			<xsd:element minOccurs="0" name="FacilityRequiredVESDEP" type="PCS-CMN:RemarksType"/>
+			<xsd:element minOccurs="0" name="AnchoringDateTimeVESDEP" type="PCS-CMN:DateTimeType"/>
+			<xsd:element minOccurs="0" name="SailingDateTimeOfPortVESDEP" type="PCS-CMN:DateTimeType"/>
+			<xsd:element minOccurs="0" name="ReasonForWaitingVESDEP" type="PCS-CMN:Char2CodeType"/>
+			<xsd:element minOccurs="0" name="ArrivalDateTimeAtBerthVESDEP" type="PCS-CMN:DateTimeType"/>
+			<xsd:element minOccurs="0" name="CommencementOfCargoOperVESDEP" type="PCS-CMN:DateTimeType"/>
+			<xsd:element minOccurs="0" name="CompletionOfCargoOperVESDEP" type="PCS-CMN:DateTimeType"/>
+			<xsd:element minOccurs="0" name="ChargeableAgentVESDEP" type="PCS-CMN:BooleanType"/>
+			<xsd:element minOccurs="0" name="ReadinessDateTimeVESDEP" type="PCS-CMN:DateTimeType"/>
+			<xsd:element minOccurs="0" name="CartingLocationVESDEP" type="PCS-CMN:CodeIDNameTextType"/>
+			<xsd:element minOccurs="0" name="DockingDateTimeAtLockGateVESDEP" type="PCS-CMN:DateTimeType"/>
+			<xsd:element minOccurs="0" name="PilotBoardedTimeVESDEP" type="PCS-CMN:DateTimeType"/>
+			<xsd:element minOccurs="0" name="BerthDateTime" type="PCS-CMN:DateTimeType"/>
+			<xsd:element minOccurs="0" name="EDTA" type="PCS-CMN:DateTimeType"/>
+			<xsd:element minOccurs="0" name="ADTP" type="PCS-CMN:DateTimeType"/>
+			<xsd:element minOccurs="0" name="DateTimeunberthingVESDEP" type="PCS-CMN:DateTimeType"/>
+			<xsd:element minOccurs="0" name="DateTimeArrivalVesselVESDEP" type="PCS-CMN:DateTimeType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

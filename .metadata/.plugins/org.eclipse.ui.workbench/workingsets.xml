@@ -35,5 +35,28 @@
 <workingSet editPageId="com.ibm.etools.mft.navigator.BrokerWorkingSet.AppLib" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1583146416117_13" label="[CHSAI02_API]" name="[CHSAI02_API]">
 <item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/CHSAI02_API" type="4"/>
 </workingSet>
+<workingSet editPageId="com.ibm.etools.mft.navigator.BrokerWorkingSet.AppLib" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1583216329609_12" label="[REQCNW]" name="[REQCNW]">
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/REQCNW" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/xmlBeautifier" type="4"/>
+</workingSet>
+<workingSet editPageId="com.ibm.etools.mft.navigator.BrokerWorkingSet.AppLib" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1583216329621_13" label="[XSDLibrary]" name="[XSDLibrary]">
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/XSDLibrary" type="4"/>
+</workingSet>
+<workingSet editPageId="com.ibm.etools.mft.navigator.BrokerWorkingSet.AppLib" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1583217576461_14" label="[CARTING_CARTRQ]" name="[CARTING_CARTRQ]">
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/CARTING_CARTRQ" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/xmlBeautifier" type="4"/>
+</workingSet>
+<workingSet editPageId="com.ibm.etools.mft.navigator.BrokerWorkingSet.AppLib" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1583217576476_15" label="[GROUNDING_REQCNG]" name="[GROUNDING_REQCNG]">
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/xmlBeautifier" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/GROUNDING_REQCNG" type="4"/>
+</workingSet>
+<workingSet editPageId="com.ibm.etools.mft.navigator.BrokerWorkingSet.AppLib" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1583217576476_16" label="[REQCNP]" name="[REQCNP]">
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/xmlBeautifier" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/REQCNP" type="4"/>
+</workingSet>
+<workingSet editPageId="com.ibm.etools.mft.navigator.BrokerWorkingSet.AppLib" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1583217576492_17" label="[SEALCUTTING_SELCUT]" name="[SEALCUTTING_SELCUT]">
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/xmlBeautifier" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/SEALCUTTING_SELCUT" type="4"/>
+</workingSet>
 <workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1583132393560_0" label="Window Working Set" name="Aggregate for window 1583132393559"/>
 </workingSetManager>

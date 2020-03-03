@@ -1,0 +1,56 @@
+CREATE COMPUTE MODULE Get_REQCNG_XMLCreation
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		CALL EDI_XGetREQCNG(Environment.variables.txnID,Environment.Variables.result1[],Environment.Variables.result2[],Environment.Variables.result3[],Environment.Variables.result4[],Environment.Variables.result5[]);
+		SET Environment.variables.dbEndTime = PASSTHRU('SELECT CURRENT_TIMESTAMP AS DBENDTIME;');
+		DECLARE i,COUNT INTEGER 1;
+		SET OutputRoot.XMLNSC.GroundingRequest.DocumentHeader.DocumentReference.DocumentType = Environment.Variables.result1[1].DocumentType;
+		SET OutputRoot.XMLNSC.GroundingRequest.DocumentHeader.DocumentReference.DocumentName = Environment.Variables.result1[1].DocumentName;
+		SET OutputRoot.XMLNSC.GroundingRequest.DocumentHeader.DocumentReference.DocumentNumber = Environment.Variables.result1[1].DocumentNumber;
+		SET OutputRoot.XMLNSC.GroundingRequest.DocumentHeader.DocumentReference.CommonRefNumber = Environment.Variables.result1[1].CommonRefNumber;
+		SET OutputRoot.XMLNSC.GroundingRequest.DocumentHeader.DocumentReference.MessageType = Environment.Variables.result1[1].MessageType;
+		SET OutputRoot.XMLNSC.GroundingRequest.DocumentHeader.DocumentReference.SenderID = Environment.Variables.result1[1].SenderID;
+
+		SET OutputRoot.XMLNSC.GroundingRequest.DocumentHeader.DocumentExchangeDetails.ReceivingPartyDetails.ReceivingParty = Environment.Variables.result2[1].ReceivingParty;
+		SET OutputRoot.XMLNSC.GroundingRequest.DocumentHeader.DocumentExchangeDetails.NotifyPartyDetails.NotifyParty = Environment.Variables.result3[1].NotifyParty;
+
+		SET OutputRoot.XMLNSC.GroundingRequest.DocumentDetails.GroundingDetails.RecordType = Environment.Variables.result1[1].RecordType;
+		SET OutputRoot.XMLNSC.GroundingRequest.DocumentDetails.GroundingDetails.RequestType = Environment.Variables.result1[1].RequestType;
+		SET OutputRoot.XMLNSC.GroundingRequest.DocumentDetails.GroundingDetails.IGMandItemNo = Environment.Variables.result1[1].IGMNo;
+		SET OutputRoot.XMLNSC.GroundingRequest.DocumentDetails.GroundingDetails.ItemNo = Environment.Variables.result1[1].LineNo;
+		SET OutputRoot.XMLNSC.GroundingRequest.DocumentDetails.GroundingDetails.IGMDate = Environment.Variables.result1[1].IGMDate;
+		SET OutputRoot.XMLNSC.GroundingRequest.DocumentDetails.GroundingDetails.BLNo = Environment.Variables.result1[1].BLNo;
+		SET OutputRoot.XMLNSC.GroundingRequest.DocumentDetails.GroundingDetails.BLDate = Environment.Variables.result1[1].BLDate;
+		
+		IF LENGTH(Environment.Variables.result1[1].PortofDischargeCode) <> 0 THEN
+		SET OutputRoot.XMLNSC.GroundingRequest.DocumentDetails.GroundingDetails.PortofDischargeCode = Environment.Variables.result1[1].PortofDischargeCode;
+		END IF;
+		SET COUNT = CARDINALITY(Environment.Variables.result4[]);
+		WHILE(i<=COUNT) DO
+		SET OutputRoot.XMLNSC.GroundingRequest.DocumentDetails.GroundingDetails.ContainerSummary.ContainerDetails[i].ContainerNo = Environment.Variables.result4[i].ContainerNo;
+		SET OutputRoot.XMLNSC.GroundingRequest.DocumentDetails.GroundingDetails.ContainerSummary.ContainerDetails[i].ISOCodeForContainer = Environment.Variables.result4[i].ISOCodeForContainer;
+		SET OutputRoot.XMLNSC.GroundingRequest.DocumentDetails.GroundingDetails.ContainerSummary.ContainerDetails[i].ContainerType = Environment.Variables.result4[i].ContainerType;
+		SET i = i+1; 
+	    END WHILE;
+		SET OutputRoot.XMLNSC.GroundingRequest.DocumentSummary.IssuedDateTime = Environment.Variables.result5[1].IssuedDateTime;
+
+
+
+		RETURN TRUE;
+	END;
+
+	CREATE PROCEDURE CopyMessageHeaders() BEGIN
+		DECLARE I INTEGER 1;
+		DECLARE J INTEGER;
+		SET J = CARDINALITY(InputRoot.*[]);
+		WHILE I < J DO
+			SET OutputRoot.*[I] = InputRoot.*[I];
+			SET I = I + 1;
+		END WHILE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		SET OutputRoot = InputRoot;
+	END;
+	CREATE PROCEDURE EDI_XGetREQCNG( IN TransactionID CHARACTER) LANGUAGE DATABASE DYNAMIC RESULT SETS 5 EXTERNAL NAME "dbo.EDI_XGetREQCNG";
+END MODULE;

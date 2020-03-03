@@ -1,7 +1,5 @@
 
 
-
-
 BROKER SCHEMA JMB_ExceptionLog
 Declare exceptionmultiple Shared ROW true ;
 CREATE COMPUTE MODULE ExceptionLog_Compute
@@ -12,6 +10,7 @@ CREATE COMPUTE MODULE ExceptionLog_Compute
 	END;
 	CREATE PROCEDURE CopyEntireMessage() BEGIN
 		DECLARE exceptionRef REFERENCE TO InputExceptionList;
+		
 		MOVE exceptionRef LASTCHILD;
 		MOVE exceptionRef LASTCHILD;
 		MOVE exceptionRef LASTCHILD;
@@ -28,6 +27,8 @@ CREATE COMPUTE MODULE ExceptionLog_Compute
 		IF LENGTH(Environment.FILE_NAME) < 1 THEN
 			SET Environment.FILE_NAME = InputLocalEnvironment.File.Name;
 		END IF;
+		DECLARE BLOBB BLOB;
+		DECLARE weberror CHARACTER;
 		DECLARE httpStatusLine CHARACTER InputRoot.HTTPResponseHeader."X-Original-HTTP-Status-Line";
 		DECLARE httpStatusCode CHARACTER InputRoot.HTTPResponseHeader."X-Original-HTTP-Status-Code";
 		IF httpStatusCode<>'200' THEN
@@ -142,6 +143,10 @@ CREATE COMPUTE MODULE ExceptionLog_Compute
 				SET OutputRoot.JSON.Data.Error_Info.ErrorDescription='Unknown Exception'; --exceptionDesc;
 			END IF;
 		END IF;
+		
+		SET BLOBB = ASBITSTREAM(OutputRoot.JSON.Data.Error_Info);
+		SET weberror = CAST(BLOBB AS CHARACTER CCSID 1208);
+		SET Environment.WebServiceError = weberror;
 		PROPAGATE TO TERMINAL 'out';
 
 		DECLARE CT CHARACTER;
@@ -149,7 +154,7 @@ CREATE COMPUTE MODULE ExceptionLog_Compute
 		DECLARE crlf CHAR CAST(CAST('X''0A''' AS BLOB) AS CHAR CCSID 1208);
 
 		DECLARE start REFERENCE TO InputExceptionList.*[<];
-		DECLARE ErrorCode,I,a INTEGER 1;
+		DECLARE ErrorCode,I,a,msrefno INTEGER 1;
 		DECLARE InsertCount INTEGER;
 		DECLARE ErrorText CHAR;
 		DECLARE staticValue CHARACTER;
@@ -166,21 +171,45 @@ CREATE COMPUTE MODULE ExceptionLog_Compute
 			END IF;
 			MOVE start LASTCHILD; --- To fetch the last child of the exception tree.
 		END WHILE;
+		-- SET msrefno = Environment.PCS_Audit.Header.MS_REF_NO;
 		SET OutputRoot.XML.MQI_ERRORS.UserExceptionTree.Executiongroup = ExecutionGroupLabel;
 		SET OutputRoot.XML.MQI_ERRORS.UserExceptionTree.Brokername = BrokerName;
 		SET OutputRoot.XML.MQI_ERRORS.UserExceptionTree.FlowName = MessageFlowLabel;
 		SET OutputRoot.XML.MQI_ERRORS.UserExceptionTree.ErrorCode = ErrorCode;
 		SET OutputRoot.XML.MQI_ERRORS.UserExceptionTree.ErrorText = ErrorText;
 		SET OutputRoot.XML.MQI_ERRORS.TIMESTAMP = CAST(CT as CHARACTER FORMAT 'yyyy/MM/dd');
-		IF Environment.MESSAGE_FORMAT = 'JSON' THEN
-			SET OutputRoot.XML.MQI_ERRORS.MsgBody = CAST(BITSTREAM(InputBody) AS CHAR CCSID 1208)||crlf;
+		IF LENGTH(Environment.variables.fileName) <> 0 THEN
+			SET OutputRoot.XML.MQI_ERRORS.MsgBody = CAST(Environment.variables.fileName AS CHAR CCSID 1208);
+		ELSEIF LENGTH(InputLocalEnvironment.File.Name) <> 0 THEN
+			SET OutputRoot.XML.MQI_ERRORS.MsgBody = CAST(InputLocalEnvironment.File.Name AS CHAR CCSID 1208);
+		ELSEIF LENGTH(Environment.WebServiceError) <> 0 THEN
+			SET OutputRoot.XML.MQI_ERRORS.MsgBody = Environment.WebServiceError;
+		ELSE
+			SET OutputRoot.XML.MQI_ERRORS.MsgBody = CAST(ASBITSTREAM(InputRoot.JSON.Data) AS CHAR CCSID 1208);
 		END IF;
-		IF LENGTH( Environment.TRANSACTION_ID) <> 0 THEN
+		IF LENGTH(Environment.TRANSACTION_ID) <> 0 THEN
 			SET OutputRoot.XML.MQI_ERRORS.TRANSACTION_ID = CAST(Environment.TRANSACTION_ID AS CHAR CCSID 1208) ;
 		ELSEIF LENGTH(Environment.FILE_NAME) <> 0 THEN
 			SET OutputRoot.XML.MQI_ERRORS.FILE_NAME = Environment.FILE_NAME;
 		END IF;
+		IF LENGTH(Environment.PCS_Audit.Header.MS_REF_NO) <> 0 THEN
+			SET OutputRoot.XML.MQI_ERRORS.MS_REF_NO = CAST(Environment.PCS_Audit.Header.MS_REF_NO AS CHAR CCSID 1208);
+		ELSE
+			SET OutputRoot.XML.MQI_ERRORS.MS_REF_NO = InputRoot.JSON.Data.JMB.EDI.Common_Ref;
+		END IF;
 		SET OutputRoot.XML.MQI_ERRORS."ExceptionList" = InputExceptionList;
+		IF LENGTH(Environment.PCS_Audit.Header.PortCode) <> 0 THEN
+			SET OutputRoot.XML.MQI_ERRORS.PORT_CODE = Environment.PCS_Audit.Header.PortCode;
+		ELSE
+			SET OutputRoot.XML.MQI_ERRORS.PORT_CODE = Environment.PCS_Audit.Header.PORT_CODE;
+		END IF;
+		IF LENGTH(Environment.PCS_Audit.Header.Event) <> 0 THEN
+			SET OutputRoot.XML.MQI_ERRORS.EVENT_NAME = Environment.PCS_Audit.Header.Event;
+		ELSE
+			SET OutputRoot.XML.MQI_ERRORS.EVENT_NAME = Environment.PCS_Audit.Header.Status;			
+
+
+		END IF;
 		propagate to TERMINAL 'out1';
 	END;
 END MODULE;

@@ -1,0 +1,77 @@
+/*EATE FUNCTION Main() RETURNS BOOLE*/
+	BEGIN
+		
+		CALL EDI_XGetREQCNP(Environment.variables.txnID,Environment.Variables.result1[],Environment.Variables.result2[],Environment.Variables.result3[],Environment.Variables.result4[],Environment.Variables.result5[],Environment.Variables.result6[]);				
+		SET Environment.variables.dbEndTime = PASSTHRU('SELECT CURRENT_TIMESTAMP AS DBENDTIME;');
+		DECLARE i INTEGER 1;
+		
+		SET OutputRoot.XMLNSC.PriorityMovementRequest.DocumentHeader.DocumentReference.DocumentType = Environment.Variables.result1[1].DocumentType;
+--		SET OutputRoot.XMLNSC.PriorityMovementRequest.DocumentHeader.DocumentReference.DocumentName = Environment.Variables.result1[1].DocumentName;
+--		SET OutputRoot.XMLNSC.PriorityMovementRequest.DocumentHeader.DocumentReference.DocumentNumber = Environment.Variables.result1[1].DocumentNumber;
+-- 		SET OutputRoot.XMLNSC.PriorityMovementRequest.DocumentHeader.DocumentReference.CommonRefNumber = Environment.Variables.result1[1].CommonRefNumber;
+-- 		SET OutputRoot.XMLNSC.PriorityMovementRequest.DocumentHeader.DocumentReference.MessageType = Environment.Variables.result1[1].MessageType;
+-- 		SET OutputRoot.XMLNSC.PriorityMovementRequest.DocumentHeader.DocumentReference.SenderID = Environment.Variables.result1[1].SenderID;
+
+ 
+		DECLARE headerRef REFERENCE TO OutputRoot.XMLNSC.PriorityMovementRequest.DocumentHeader.DocumentReference;
+		SET headerRef.DocumentName = Environment.Variables.result1[1].DocumentName;
+		SET headerRef.DocumentNumber = Environment.Variables.result1[1].DocumentNumber;
+		SET headerRef.CommonRefNumber = Environment.Variables.result1[1].CommonRefNumber;
+		SET headerRef.MessageType = Environment.Variables.result1[1].MessageType;
+		SET headerRef.SenderID = Environment.Variables.result1[1].SenderID;
+		SET headerRef.PortCode = Environment.Variables.result1[1].PortCode;
+		
+		DECLARE recPartyCardinality INTEGER CARDINALITY (Environment.Variables.result2[]);
+		DECLARE notPartyCardinality INTEGER CARDINALITY (Environment.Variables.result3[]);
+		WHILE (i <= recPartyCardinality) DO
+			SET OutputRoot.XMLNSC.PriorityMovementRequest.DocumentHeader.DocumentExchangeDetails.ReceivingPartyDetails.ReceivingParty[i] = Environment.Variables.result2[i].ReceivingParty;
+			SET i = i + 1;
+		END WHILE;
+			 SET i = 1;
+			 WHILE (i <= notPartyCardinality) DO
+			 SET OutputRoot.XMLNSC.PriorityMovementRequest.DocumentHeader.DocumentExchangeDetails.NotifyPartyDetails.NotifyParty[i] = Environment.Variables.result3[i].NotifyParty;
+			 SET i = i + 1;
+			 END WHILE;
+		
+		SET OutputRoot.XMLNSC.PriorityMovementRequest.DocumentDetails.PriorityMovementDetails.RecordType = Environment.Variables.result1[1].RecordType;
+		SET OutputRoot.XMLNSC.PriorityMovementRequest.DocumentDetails.PriorityMovementDetails.RequestType = Environment.Variables.result1[1].RequestType;
+		SET OutputRoot.XMLNSC.PriorityMovementRequest.DocumentDetails.PriorityMovementDetails.IGMNo = Environment.Variables.result1[1].IGMNo;
+		SET OutputRoot.XMLNSC.PriorityMovementRequest.DocumentDetails.PriorityMovementDetails.LineNo = Environment.Variables.result1[1].LineNo;
+		SET OutputRoot.XMLNSC.PriorityMovementRequest.DocumentDetails.PriorityMovementDetails.IGMDate = Environment.Variables.result1[1].IGMDate;
+		SET OutputRoot.XMLNSC.PriorityMovementRequest.DocumentDetails.PriorityMovementDetails.BLNo = Environment.Variables.result1[1].BLNo;
+		SET OutputRoot.XMLNSC.PriorityMovementRequest.DocumentDetails.PriorityMovementDetails.BLDate = Environment.Variables.result1[1].BLDate;
+		
+--		IF Environment.Variables.result1[1].PortofDischargeCode <> '0' THEN
+--		SET OutputRoot.XMLNSC.GroundingRequest.DocumentDetails.GroundingDetails.PortofDischargeCode = Environment.Variables.result1[1].PortofDischargeCode;
+--		END IF;
+		
+--		IF LENGTH(COALESCE(Environment.Variables.result1[1].ServiceCategory,'')) > 0 THEN
+--			SET OutputRoot.XMLNSC.PaymentStatus.DocumentDetails.PaymentStatusDetails.ServiceCategory = Environment.Variables.result1[1].ServiceCategory;
+--		END IF;
+		
+		IF LENGTH(COALESCE(Environment.Variables.result1[1].PortofDischargeCode,'')) > 0 THEN
+		SET OutputRoot.XMLNSC.PriorityMovementRequest.DocumentDetails.PriorityMovementDetails.PortofDischargeCode = Environment.Variables.result1[1].PortofDischargeCode;
+		END IF;
+		
+		
+		
+		DECLARE j INTEGER 1;
+		DECLARE containerDetails INTEGER CARDINALITY (Environment.Variables.result4[]);		
+		WHILE (j <= containerDetails) DO
+		SET OutputRoot.XMLNSC.PriorityMovementRequest.DocumentDetails.ContainerSummary.ContainerDetails[j].ContainerNo = Environment.Variables.result4[j].ContainerNo;
+	--	DECLARE containerDetails REFERENCE TO OutputRoot.XMLNSC.PriorityMovementRequest.DocumentDetails.ContainerSummary.ContainerDetails;
+		SET OutputRoot.XMLNSC.PriorityMovementRequest.DocumentDetails.ContainerSummary.ContainerDetails[j].ISOCodeForContainer = Environment.Variables.result4[j].ISOCodeForContainer;
+		SET OutputRoot.XMLNSC.PriorityMovementRequest.DocumentDetails.ContainerSummary.ContainerDetails[j].ContainerType = Environment.Variables.result4[j].ContainerType;
+		
+		SET j = j + 1;
+		END WHILE;
+		
+		SET OutputRoot.XMLNSC.PriorityMovementRequest.DocumentSummary.IssuedDateTime = Environment.Variables.result5[1].IssuedDateTime;
+			
+		
+	END;
+
+CREATE PROCEDURE EDI_XGetREQCNP( IN TransactionID CHARACTER)
+LANGUAGE DATABASE
+DYNAMIC RESULT SETS 6
+EXTERNAL NAME "dbo.EDI_XGetREQCNP";

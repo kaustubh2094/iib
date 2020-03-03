@@ -1,0 +1,24 @@
+CREATE COMPUTE MODULE REQCNW_API_ConstructRequest
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		CREATE FIELD OutputRoot.JSON.Data.ReqHeader;
+		SET OutputRoot.JSON.Data.ReqHeader.Channel_ID = 'IndianPCS';
+		SET OutputRoot.JSON.Data.ReqHeader.Service_ID = '112312';
+		SET OutputRoot.JSON.Data.ReqHeader.Request_ID = '112312';
+		SET Environment.ReqDate = PASSTHRU('SELECT CURRENT_TIMESTAMP AS WebReq');
+		SET OutputRoot.JSON.Data.ReqHeader.Request_Date = CAST(Environment.ReqDate[1].WebReq AS CHARACTER);
+		SET OutputRoot.JSON.Data.ReqHeader.Request_Date = REPLACE(OutputRoot.JSON.Data.ReqHeader.Request_Date,'TIMESTAMP ','');
+		SET OutputRoot.JSON.Data.ReqHeader.Request_Date = SUBSTRING(OutputRoot.JSON.Data.ReqHeader.Request_Date FROM 2 FOR 22);
+		SET OutputRoot.JSON.Data.ReqBody.XML = InputRoot.XMLNSC.data.payload;
+		SET OutputLocalEnvironment.Destination.HTTP.RequestURL = InputRoot.XMLNSC.data.url;
+		SET Environment.WebReq = OutputRoot.JSON.Data.ReqHeader.Request_Date;
+		SET Environment.Cr = InputRoot.XMLNSC.data.comref;
+		SET Environment.url = InputRoot.XMLNSC.Data.URL;
+		SET Environment.portcode = InputRoot.XMLNSC.data.comref;
+		SET Environment.variables.AuditSeq = PASSTHRU('SELECT NEXT VALUE FOR IPAOWNER.TPCS_AUDIT_API_SEQ AS SEQ;');
+		INSERT INTO Database.PCSIBM.TIBM_LOG_AUDIT_API(API_Request_ID,API_Channel_ID,API_Request_Date,SITE_ID,MS_REF_NO,MSG_TYPE,MSG_DIRECTION,API_URL,API_TIMESTAMP,TRM_STATUS,PAYLOAD_OUT,AUDITSEQ) 
+		VALUES('251111','IndianPCS',CURRENT_TIMESTAMP,InputRoot.XMLNSC.data.siteid,InputRoot.XMLNSC.data.comref,'REQCNW','OUTBOUND',InputRoot.XMLNSC.data.url,CURRENT_TIMESTAMP,'0',InputRoot.XMLNSC.data.payload,Environment.variables.AuditSeq[1].SEQ);
+		COMMIT;
+        RETURN TRUE;
+	END;
+END MODULE;

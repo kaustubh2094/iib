@@ -1,0 +1,23 @@
+/*EATE FUNCTION Main() RETURNS BOOLE*/
+	BEGIN
+		SET Environment.PCS_Audit.Details.Message.EDI_END_TS = CURRENT_TIMESTAMP;
+		IF (Environment.replyidentifier = 'Y') THEN
+			SET OutputRoot.XML.PCS_Audit.Header.MS_REF_NO = Environment.PCS_Audit.Header.MS_REF_NO;
+			DECLARE logreff REFERENCE TO OutputRoot.XML.PCS_Audit.Header;
+			SET logreff.MSG_UID = Environment.PCS_Audit.Header.MSG_UID;
+			SET logreff.MSG_TYPE = Environment.PCS_Audit.Header.MSG_TYPE;
+			SET logreff.MSG_TIME = Environment.PCS_Audit.Header.MSG_TIME;
+			SET logreff.MSG_SNDR = Environment.PCS_Audit.Header.MSG_SNDR;
+			SET logreff.PORT_CODE = Environment.PCS_Audit.Header.PORT_CODE;
+			SET logreff.EVENT_NAME = 'Port_Trmnl_Drop';
+			SET OutputRoot.XML.PCS_Audit.Details.Message.EDI_START_TS = Environment.PCS_Audit.Details.Message.EDI_START_TS;
+			DECLARE msgreff REFERENCE TO OutputRoot.XML.PCS_Audit.Details.Message;
+			SET msgreff.EDI_END_TS = Environment.PCS_Audit.Details.Message.EDI_END_TS;
+			SET msgreff.FILE_NAME = Environment.PCS_Audit.Details.Message.FILE_NAME;
+			SET msgreff.EDI_DIRECTORY_INFO = Environment.PCS_Audit.Details.Message.EDI_DIRECTORY_INFO;
+			PROPAGATE TO TERMINAL 'out';
+			RETURN FALSE;
+		ELSE
+			RETURN FALSE;
+		END IF;
+	END;

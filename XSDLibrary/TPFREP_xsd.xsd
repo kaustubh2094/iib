@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?><!-- Copyright 07 Crimsonlogic Pte Ltd; Version : 3.0--><xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:PCS-CMN="PCS_Common_Types">
+	<xsd:import namespace="PCS_Common_Types" schemaLocation="PCS_CommonTypes.xsd"/>
+	<xsd:element name="TerminalPerformance" type="TerminalPerformanceType"/>
+	<xsd:complexType name="TerminalPerformanceType">
+		<xsd:sequence>
+			<xsd:element name="DocumentHeader" type="PCS-CMN:DocumentHeaderType"/>
+			<xsd:element name="DocumentDetails" type="DocumentDetailsTypeTPFREP"/>
+			<xsd:element name="DocumentSummary" type="PCS-CMN:DocumentSummaryType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="DocumentDetailsTypeTPFREP">
+		<xsd:sequence>
+			<xsd:element name="TPRHeader" type="TPRHeaderType"/>
+			<xsd:element name="ShiftWiseCargoDetails" type="ShiftWiseCargoDetailsType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="TPRHeaderType">
+		<xsd:sequence>
+			<xsd:element name="RecordType" type="PCS-CMN:RecordType"/>
+			<xsd:element name="TOOrDockCode" type="PCS-CMN:PDAccNumType"/>
+			<xsd:element name="VCN" type="PCS-CMN:VCNType"/>
+			<xsd:element name="CallSign" type="PCS-CMN:CodeIDNameTextType"/>
+			<xsd:element name="IMONumber" type="PCS-CMN:CodeIDNameTextType"/>
+			<xsd:element name="VoyageNumber" type="PCS-CMN:CodeIDNameTextType"/>
+			<xsd:element name="BerthNumber" type="PCS-CMN:BerthType"/>
+			<xsd:element name="SACode" type="PCS-CMN:PDAccNumType"/>
+			<xsd:element name="SLCode" type="PCS-CMN:PDAccNumType"/>
+			<xsd:element minOccurs="0" name="AllottedDateandTimeofDocking" type="PCS-CMN:DateTimeType"/>
+			<xsd:element minOccurs="0" name="AllottedDateNTimeofUnDocking" type="PCS-CMN:DateTimeType"/>
+			<xsd:element name="VesselType" type="PCS-CMN:VesselType"/>
+			<xsd:element name="VesselLength" type="PCS-CMN:HeightLengthWeightType"/>
+			<xsd:element name="VesselBeam" type="PCS-CMN:HeightLengthWeightType"/>
+			<xsd:element name="EquipmentStatusCode" type="PCS-CMN:Char3CodeType"/>
+			<xsd:element name="ShiftNumber" type="PCS-CMN:ShiftType"/>
+			<xsd:element minOccurs="0" name="VesselDraft" type="PCS-CMN:HeightLengthWeightType"/>
+			<xsd:element minOccurs="0" name="ActualCommOfCargoOper" type="PCS-CMN:DateType"/>
+			<xsd:element minOccurs="0" name="ActualCompleOfCargoOper" type="PCS-CMN:DateType"/>
+			<xsd:element name="OperationStatusOfVessel" type="PCS-CMN:Char1CodeType"/>
+			<xsd:element minOccurs="0" name="ActualPositionOfVessel" type="PCS-CMN:CodeIDNameTextType"/>
+			<xsd:element minOccurs="0" name="BalanceDisCargo" type="PCS-CMN:CargoWeightType"/>
+			<xsd:element minOccurs="0" name="BalanceDisCont" type="PCS-CMN:NoOfContainersType"/>
+			<xsd:element minOccurs="0" name="BalanceLoadCargo" type="PCS-CMN:CargoWeightType"/>
+			<xsd:element minOccurs="0" name="BalanceLoadCont" type="PCS-CMN:NoOfContainersType"/>
+			<xsd:element minOccurs="0" name="VesselWorkingatAnchorageorStream" type="PCS-CMN:Char1CodeType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ShiftWiseCargoDetailsType">
+		<xsd:sequence>
+			<xsd:element maxOccurs="unbounded" name="Cargo" type="HandledCargoDetailsType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="HandledCargoDetailsType">
+		<xsd:sequence>
+			<xsd:element name="RecordType" type="PCS-CMN:RecordType"/>
+			<xsd:element name="VCN" type="PCS-CMN:VCNType"/>
+			<xsd:element name="IMONumber" type="PCS-CMN:CodeIDNameTextType"/>
+			<xsd:element name="CallSign" type="PCS-CMN:CodeIDNameTextType"/>
+			<xsd:element name="VoyageNumber" type="PCS-CMN:CodeIDNameTextType"/>
+			<xsd:element name="BerthNumber" type="PCS-CMN:BerthType"/>
+			<xsd:element name="TOOrDockCode" type="PCS-CMN:StakeholderIDTextType"/>
+			<xsd:element name="VesselBerthingStatus" type="PCS-CMN:Char1CodeType"/>
+			<xsd:element minOccurs="0" name="VesselBerthingSubStatus" type="PCS-CMN:Char1CodeType"/>
+			<xsd:element name="NatureOfCargo" type="PCS-CMN:Char2CodeType"/>
+			<xsd:element name="EquipmentStatus" type="PCS-CMN:Char3CodeType"/>
+			<xsd:element name="VesselBargeFlag" type="PCS-CMN:VesselBargeFlagType"/>
+			<xsd:element name="ShiftOperation" type="PCS-CMN:Char1CodeType"/>
+			<xsd:element name="OperationDateTime" type="PCS-CMN:DateTimeType"/>
+			<xsd:element minOccurs="0" name="NoOfGangs" type="PCS-CMN:NumberType"/>
+			<xsd:element minOccurs="0" name="CommondityCode" type="PCS-CMN:ISOCodeType"/>
+			<xsd:element minOccurs="0" name="NoOfContHandled" type="PCS-CMN:NoOfContainersType"/>
+			<xsd:element minOccurs="0" name="CraneStartedDateTime" type="PCS-CMN:DateTimeType"/>
+			<xsd:element minOccurs="0" name="CraneStopDateTime" type="PCS-CMN:DateTimeType"/>
+			<xsd:element minOccurs="0" name="TotalTEUsDischarged" type="PCS-CMN:NoOfContainersType"/>
+			<xsd:element minOccurs="0" name="TotalTEUsLoadedForCont" type="PCS-CMN:NoOfContainersType"/>
+			<xsd:element minOccurs="0" name="TotalTonnageDischargedForCont" type="PCS-CMN:TotalTonnageType"/>
+			<xsd:element minOccurs="0" name="TotalTonnageLoadedForCont" type="PCS-CMN:TotalTonnageType"/>
+			<xsd:element minOccurs="0" name="TotalTonDisOtherThanCont" type="PCS-CMN:TotalTonnageType"/>
+			<xsd:element minOccurs="0" name="TotalTonLoadedOtherThanCont" type="PCS-CMN:TotalTonnageType"/>
+			<xsd:element minOccurs="0" name="TotalTonForAllCargo" type="PCS-CMN:OtherTotalTonnageType"/>
+			<xsd:element minOccurs="0" name="CumulativeTotTEUsDischarged" type="PCS-CMN:NoOfContainersType"/>
+			<xsd:element minOccurs="0" name="CumulativeTotTEUsLoaded" type="PCS-CMN:NoOfContainersType"/>
+			<xsd:element minOccurs="0" name="CumulativeTotTonDischarged" type="PCS-CMN:TotalTonnageType"/>
+			<xsd:element minOccurs="0" name="CumulativeTotTonLoaded" type="PCS-CMN:TotalTonnageType"/>
+			<xsd:element minOccurs="0" name="CumTotTonDisOtherThanCont" type="PCS-CMN:TotalTonnageType"/>
+			<xsd:element minOccurs="0" name="CumTotTonLoadedOtherThanCont" type="PCS-CMN:TotalTonnageType"/>
+			<xsd:element minOccurs="0" name="CumTotalTonForAllCargo" type="PCS-CMN:OtherTotalTonnageType"/>
+			<xsd:element minOccurs="0" name="NoOfUnits" type="PCS-CMN:ContTonnageType"/>
+			<xsd:element minOccurs="0" name="CumNoOfUnits" type="PCS-CMN:ContTonnageType"/>
+			<xsd:element minOccurs="0" name="StevedoreName" type="PCS-CMN:AgentNameTextType"/>
+			<xsd:element minOccurs="0" name="Norms" type="PCS-CMN:DescType"/>
+			<xsd:element minOccurs="0" name="HatchNumber" type="PCS-CMN:CodeIDNameTextType"/>
+			<xsd:element minOccurs="0" name="DetentionAccount" type="PCS-CMN:Char3CodeType"/>
+			<xsd:element minOccurs="0" name="DetentionFrom" type="PCS-CMN:DateType"/>
+			<xsd:element minOccurs="0" name="DetentionTo" type="PCS-CMN:DateType"/>
+			<xsd:element minOccurs="0" name="DetentionReason" type="PCS-CMN:RemarksType"/>
+			<xsd:element minOccurs="0" name="CargoCasualty" type="PCS-CMN:RemarksType"/>
+			<xsd:element minOccurs="0" name="NumberOfMoves20" type="PCS-CMN:NoOfTEUsType"/>
+			<xsd:element minOccurs="0" name="NumberOfMoves40" type="PCS-CMN:NoOfTEUsType"/>
+			<xsd:element minOccurs="0" name="NumberOfMoves45" type="PCS-CMN:NoOfTEUsType"/>
+			<xsd:element minOccurs="0" name="LockBox" type="PCS-CMN:Char2CodeType"/>
+			<xsd:element minOccurs="0" name="ContainerType" type="PCS-CMN:Char2CodeType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

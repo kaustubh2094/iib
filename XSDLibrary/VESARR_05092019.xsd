@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:PCS-CMN="PCS_Common_Types" xmlns:pref="PCS_Common_Types">
+	<xsd:import namespace="PCS_Common_Types" schemaLocation="../XSDLibrary/PCS_CommonTypes.xsd"/>
+	<xsd:element name="VesselArrival" type="VesselArrivalType"/>
+	<xsd:complexType name="VesselArrivalType">
+		<xsd:sequence>
+			<xsd:element name="DocumentHeader" type="PCS-CMN:DocumentHeaderType"/>
+			<xsd:element name="DocumentDetails" type="DocumentDetailsType"/>
+			<xsd:element name="DocumentSummary" type="PCS-CMN:DocumentSummaryType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="DocumentDetailsType">
+		<xsd:sequence>
+			<xsd:element name="VesselMovementDetails" type="VesselMovementDetailsType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="VesselMovementDetailsType">
+		<xsd:sequence>
+			<xsd:element name="RecordType" type="PCS-CMN:RecordType"/>
+			<xsd:element name="BerthNumber" type="PCS-CMN:BerthType"/>
+			<xsd:element name="VCN" type="PCS-CMN:VCNType"/>
+			<xsd:element name="IMONumber" type="PCS-CMN:CodeIDNameTextType"/>
+			<xsd:element name="CallSign" type="PCS-CMN:CodeIDNameTextType"/>
+			<xsd:element name="VoyageNumber" type="PCS-CMN:CodeIDNameTextType"/>
+			<xsd:element name="TOOrDOckCode" type="PCS-CMN:StakeholderIDTextType"/>
+			<xsd:element name="TerminalAR" type="PCS-CMN:CodeIDNameTextType"/>
+			<xsd:element name="VesselName" type="PCS-CMN:VesselNameType" minOccurs="0"/>
+			<xsd:element name="CountryOfVessel" type="PCS-CMN:CountryCodeType" minOccurs="0"/>
+			<xsd:element name="SACode" type="PCS-CMN:AgencyType" minOccurs="0"/>
+			<xsd:element name="SLCode" type="PCS-CMN:AgencyType" minOccurs="0"/>
+			<xsd:element name="RotationNumber" type="PCS-CMN:CustomNumberType" minOccurs="0"/>
+			<xsd:element name="RotationDate" type="PCS-CMN:DateType" minOccurs="0"/>
+			<xsd:element name="AnchoringDateTime" type="PCS-CMN:DateTimeType"/>
+			<xsd:element name="ReadinessDateTime" type="PCS-CMN:DateTimeType" minOccurs="0"/>
+			<xsd:element name="DockingDateTimeAtLockGate" type="PCS-CMN:DateTimeType" minOccurs="0"/>
+			<xsd:element name="PilotBoardedTime" type="PCS-CMN:DateTimeType"/>
+			<xsd:element name="BerthDateTime" type="PCS-CMN:DateTimeType"/>
+			<xsd:element name="EDTA" type="PCS-CMN:DateTimeType" minOccurs="0"/>
+			<xsd:element name="ADTP" type="PCS-CMN:DateTimeType" minOccurs="0"/>
+			<xsd:element minOccurs="0" name="DateTimeArrivalVessel" type="PCS-CMN:DateTimeType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

@@ -1,0 +1,18 @@
+BROKER SCHEMA OUTBOUND_TXT_XML
+
+
+CREATE FILTER MODULE CARTING_CARTRQ_XML_Filter
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		IF (Environment.Variables.Result[1].FileFormat = 'XML' OR Environment.Variables.Result56[1].FileFormat = 'XML') THEN
+			RETURN TRUE;
+--		ELSEIF (Environment.Variables.Result[1].FileFormat = 'TXT' OR Environment.Variables.Result56[1].FileFormat = 'TXT') THEN
+--			RETURN FALSE;
+--		ELSE
+--			SET Environment.variables.noResultbyProcedure = TRUE;
+--			THROW EXCEPTION;
+		END IF;
+		RETURN TRUE;
+	END;
+
+END MODULE;

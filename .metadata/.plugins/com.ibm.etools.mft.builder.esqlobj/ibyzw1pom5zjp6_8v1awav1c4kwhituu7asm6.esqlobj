@@ -1,0 +1,51 @@
+/*EATE FUNCTION Main() RETURNS BOOLE*/
+	BEGIN
+		CALL EDI_XGetCARTRQ(Environment.variables.txnID,Environment.Variables.result1[],Environment.Variables.result2[],Environment.Variables.result3[],Environment.Variables.result4[],Environment.Variables.result5[]);
+		SET Environment.variables.dbEndTime = PASSTHRU('SELECT CURRENT_TIMESTAMP AS DBENDTIME;');
+		DECLARE i,j,s,m INTEGER 1;
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentHeader.DocumentReference.DocumentType = Environment.Variables.result1[1].DocumentType;
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentHeader.DocumentReference.DocumentName = Environment.Variables.result1[1].DocumentName;
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentHeader.DocumentReference.DocumentNumber = Environment.Variables.result1[1].DocumentNumber;
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentHeader.DocumentReference.CommonRefNumber = Environment.Variables.result1[1].CommonRefNumber;
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentHeader.DocumentReference.MessageType = Environment.Variables.result1[1].MessageType;
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentHeader.DocumentReference.SenderID = Environment.Variables.result1[1].SenderID;
+
+		SET s = CARDINALITY(Environment.Variables.result2[]);
+		WHILE i <=s DO
+			SET OutputRoot.XMLNSC.ReqForCarting.DocumentHeader.DocumentExchangeDetails.ReceivingPartyDetails[i].ReceivingParty = Environment.Variables.result2[i].ReceivingParty;
+			SET i =i+1;
+		END WHILE;
+
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentDetails.CartingPermissionHeader.RecordType = Environment.Variables.result1[1].RecordType;
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentDetails.CartingPermissionHeader.VCNNumber = Environment.Variables.result1[1].VCNNumber;
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentDetails.CartingPermissionHeader.IMONumber = Environment.Variables.result1[1].IMONumber;
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentDetails.CartingPermissionHeader.CallSign = Environment.Variables.result1[1].CallSign;
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentDetails.CartingPermissionHeader.VoyageNumber = Environment.Variables.result1[1].VoyageNumber;
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentDetails.CartingPermissionHeader.VesselName = Environment.Variables.result1[1].VesselName;
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentDetails.CartingPermissionHeader.SACode = Environment.Variables.result1[1].SACode;
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentDetails.CartingPermissionHeader.CHACode = Environment.Variables.result1[1].CHACode;
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentDetails.CartingPermissionHeader.CartingDate = Environment.Variables.result1[1].CartingDate;
+
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentDetails.CartingPermissionHeader.NoOf20FtCont = Environment.Variables.result1[1].NoOf20FtCont;
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentDetails.CartingPermissionHeader.NoOf40FtCont = Environment.Variables.result1[1].NoOf40FtCont;
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentDetails.CartingPermissionHeader.NoOfOthCont = Environment.Variables.result1[1].NoOfOthCont;
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentDetails.CartingPermissionHeader.SBNumber = Environment.Variables.result1[1].SBNumber;
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentDetails.CartingPermissionHeader.SBDate = Environment.Variables.result1[1].SBDate;
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentDetails.CartingPermissionHeader.PortOfDestination = Environment.Variables.result1[1].PortOfDestination;
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentDetails.CartingPermissionHeader.TruckNumber = Environment.Variables.result1[1].TruckNumber;
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentDetails.CartingPermissionHeader.CartingUpToDate = Environment.Variables.result1[1].CartingUpToDate;
+
+		SET m = CARDINALITY(Environment.Variables.result4[]);
+		WHILE j<=m DO
+			SET OutputRoot.XMLNSC.ReqForCarting.DocumentDetails.CargoDetails.Cargo[j].RecordNumber = Environment.Variables.result4[j].RecordNumber;
+			SET OutputRoot.XMLNSC.ReqForCarting.DocumentDetails.CargoDetails.Cargo[j].TypeOfCargo = Environment.Variables.result4[j].TypeOfCargo;
+			SET OutputRoot.XMLNSC.ReqForCarting.DocumentDetails.CargoDetails.Cargo[j].CargoDesc = Environment.Variables.result4[j].CargoDesc;
+			SET OutputRoot.XMLNSC.ReqForCarting.DocumentDetails.CargoDetails.Cargo[j].Weight = Environment.Variables.result4[j].Weight;
+			SET j=j+1;
+		END WHILE;
+
+		SET OutputRoot.XMLNSC.ReqForCarting.DocumentSummary.IssuedDateTime = Environment.Variables.result5[1].IssuedDateTime;
+		RETURN TRUE;
+	END;
+	CREATE PROCEDURE EDI_XGetCARTRQ( IN TransactionID CHARACTER) LANGUAGE DATABASE DYNAMIC RESULT SETS 5 EXTERNAL NAME "dbo.EDI_XGetCARTRQ";
+

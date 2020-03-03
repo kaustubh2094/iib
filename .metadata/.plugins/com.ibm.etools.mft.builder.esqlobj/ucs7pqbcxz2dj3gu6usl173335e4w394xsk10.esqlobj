@@ -1,0 +1,167 @@
+/*EATE FUNCTION Main() RETURNS BOOLE*/
+	BEGIN
+
+		DECLARE inputXML CHARACTER;
+		DECLARE separator CHAR;
+		DECLARE chartimestamp CHAR CURRENT_TIMESTAMP;
+		DECLARE commonrefno,senderId,recivingId,messageId,Voyage CHARACTER;
+		SET separator = CAST(x'1d' AS CHAR CCSID 1208);
+		SET senderId= InputRoot.XMLNSC.CHPOE09Payload.DocumentHeader.SenderId;
+		SET recivingId= InputRoot.XMLNSC.CHPOE09Payload.DocumentHeader.ReceiverId;
+		SET messageId= InputRoot.XMLNSC.CHPOE09Payload.DocumentHeader.MessageId;
+		SET commonrefno = InputRoot.XMLNSC.CHPOE09Payload.DocumentHeader.PCSCommonRefNumber;
+		DECLARE docHdrRef REFERENCE TO InputRoot.XMLNSC.CHPOE09Payload.DocumentHeader;
+		DECLARE docbodRef REFERENCE TO InputRoot.XMLNSC.CHPOE09Payload;
+		SET Voyage = InputRoot.XMLNSC.CHPOE09Payload.RotationNumberAllotmentDetails.VoyageNo;
+		SET Environment.FILE_NAME = InputLocalEnvironment.File.Name;
+
+
+		SET Environment.PCS_Audit.Header.MS_REF_NO = commonrefno ;
+		SET Environment.PCS_Audit.Header.MSG_UID = UUIDASCHAR;
+		SET Environment.PCS_Audit.Header.MSG_TYPE = 'CHPOE09';
+		SET Environment.PCS_Audit.Header.MSG_TIME = CURRENT_TIMESTAMP;
+		SET Environment.PCS_Audit.Header.MSG_SNDR = BrokerUserId||','||ExecutionGroupLabel||','||BrokerName||'';
+
+		Set inputXML = CAST(ASBITSTREAM(InputRoot) as char CCSID 1208);
+		Set inputXML = REPLACE(inputXML, 'encoding="utf-8"', 'encoding="utf-16"');
+		Set inputXML = REPLACE(inputXML, 'encoding="UTF-8"', 'encoding="utf-16"');
+
+		SET Environment.PCS_Audit.Database.DB_SP_END_TS = CURRENT_TIMESTAMP;
+
+		SET Environment.PCS_Audit.Details.Message.EDI_START_TS = CURRENT_TIMESTAMP;
+
+		DECLARE locEnvXMLRef REFERENCE TO OutputLocalEnvironment;
+		CREATE LASTCHILD OF OutputLocalEnvironment AS locEnvXMLRef DOMAIN('XMLNSC');
+		SET locEnvXMLRef = InputBody;
+
+		DECLARE crlf CHAR CAST(CAST('X''0A''' AS BLOB) AS CHAR CCSID InputRoot.Properties.CodedCharSetId );
+
+		CALL EDI_CustomsEnhancedGetPath(senderId, recivingId, '', '', '','CHPOE09',Environment.Data1[],Environment.Data2[],Environment.Data3[],Environment.Data4[]);
+
+		IF EXISTS(Environment.Data1[]) THEN
+			SET Environment.Data[] = Environment.Data3[];
+		ELSE
+			SET Environment.Data[] = Environment.Data2[];
+		END IF;
+
+		DECLARE PATH,PATHCOUNT INTEGER 1;
+		SET PATH = CARDINALITY(Environment.Data[]);
+		DECLARE Recipientlist,Recipientlist_PortCode CHARACTER;
+		WHILE PATHCOUNT <= PATH DO
+			SET Recipientlist=COALESCE(Recipientlist,'')||Environment.Data[PATHCOUNT].FilePath;
+			SET Recipientlist=Recipientlist ||',';
+			SET PATHCOUNT=PATHCOUNT+1;
+		END WHILE ;
+		SET PATHCOUNT =1;
+		WHILE PATHCOUNT <= PATH DO
+			SET Recipientlist_PortCode=COALESCE(Recipientlist_PortCode,'')||Environment.Data[PATHCOUNT].PORT_CODE;
+			SET Recipientlist_PortCode=Recipientlist_PortCode ||',';
+			SET PATHCOUNT=PATHCOUNT+1;
+		END WHILE ;
+		SET Environment.PCS_Audit.Details.Message.EDI_DIRECTORY_INFO = Recipientlist;
+		SET Environment.PCS_Audit.Header.PORT_CODE =Recipientlist_PortCode;
+
+		SET Environment.PCS_Audit.Details.Message.EDI_START_TS=CURRENT_TIMESTAMP;
+		------------added---------------------
+
+		DECLARE resultSetCnt INTEGER CARDINALITY (Environment.Data[]);
+		DECLARE outerCntr INTEGER 1;
+
+		WHILE (outerCntr <= resultSetCnt) DO
+			IF (outerCntr = 1) THEN
+				SET Environment.replyidentifier = 'Y';
+			ELSE
+				SET Environment.replyidentifier = 'N';
+			END IF;
+
+			IF Environment.Data[outerCntr].FileFormat <> 'XML' THEN
+				SET OutputRoot.DFDL.Custom02.hrec.head_elem1 = COALESCE(docHdrRef.SenderIdQualifier,'')||separator||
+				COALESCE(docHdrRef.SenderId,'')||separator||
+				COALESCE(docHdrRef.ReceiverIdQualifier,'')||separator||
+				COALESCE(docHdrRef.ReceiverId,'')||separator||
+				COALESCE(docHdrRef.VersionNumber,'')||separator||
+				COALESCE(docHdrRef.TestProductionFlag,'')||separator||
+				COALESCE(docHdrRef.MessageId,'')||separator||
+				COALESCE(docHdrRef.ControlNumber,'')||separator||
+				COALESCE(docHdrRef.SentDate,'')||separator||
+				COALESCE(docHdrRef.SentTime,'')||separator||
+				COALESCE(docHdrRef.PCSCommonRefNumber,'');
+				DECLARE rotncount,i INTEGER;
+				SET rotncount= CARDINALITY(InputRoot.XMLNSC.CHPOE09Payload.RotationNumberAllotmentDetails[]);
+				SET i = 1;
+				WHILE i <= rotncount DO
+					SET OutputRoot.DFDL.Custom02.rotnno[i].rotn_no = '<rotn_no>';
+					SET OutputRoot.DFDL.Custom02.rotnno[i].body_elem1 = COALESCE(docbodRef.RotationNumberAllotmentDetails[i].MessageType,'')||separator||
+					COALESCE(docbodRef.RotationNumberAllotmentDetails[i].SiteID,'')||separator||
+					COALESCE(docbodRef.RotationNumberAllotmentDetails[i].IMOCode,'')||separator||
+					COALESCE(docbodRef.RotationNumberAllotmentDetails[i].VesselCode,'')||separator||
+					COALESCE(docbodRef.RotationNumberAllotmentDetails[i].VoyageNo,'')||separator||
+					COALESCE(docbodRef.RotationNumberAllotmentDetails[i].IGMNumber,'')||separator||
+					COALESCE(docbodRef.RotationNumberAllotmentDetails[i].IGMDate,'')||separator||
+					COALESCE(docbodRef.RotationNumberAllotmentDetails[i].ShippingLineCode,'')||separator||
+					COALESCE(docbodRef.RotationNumberAllotmentDetails[i].ShipingAgentCode,'')||separator||
+					COALESCE(docbodRef.RotationNumberAllotmentDetails[i].RotationNumber,'')||separator||
+					COALESCE(docbodRef.RotationNumberAllotmentDetails[i].RotationDate,'')||separator||
+					COALESCE(docbodRef.RotationNumberAllotmentDetails[i].AmendmentStatus,'');
+					SET OutputRoot.DFDL.Custom02.rotnno."END-rotn_no" = '<END-rotn_no>';
+					SET i= i+1;
+				END WHILE;
+				SET OutputRoot.DFDL.Custom02.trec.trailer_elem1 = docHdrRef.ControlNumber;
+
+				SET Environment.PCS_Audit.Details.Message.FILE_NAME=InputLocalEnvironment.File.Name;
+
+				SET Environment.MailID=Environment.Data.EMAIL_ID;
+				SET Environment.MobileNo=Environment.Data.MOBILE_NO;
+				---code change
+				IF (CONTAINS(Environment.Data[outerCntr].PORT_CODE,'6')) THEN
+					SET OutputLocalEnvironment.Destination.File.Remote.ServerDirectory = Environment.Data[outerCntr].FilePath;
+					SET OutputLocalEnvironment.Destination.File.Name = 'CHPOE09_'||Environment.Data[outerCntr].PORT_CODE||'_'||SUBSTRING(InputLocalEnvironment.File.Name AFTER 'CHPOE09_');
+					SET OutputLocalEnvironment.Destination.File.Name = SUBSTRING(OutputLocalEnvironment.Destination.File.Name BEFORE '.xml')||'.txt';
+				ELSE
+					SET OutputLocalEnvironment.Destination.File.Remote.ServerDirectory = Environment.Data[outerCntr].FilePath;
+					SET OutputLocalEnvironment.Destination.File.Name = SUBSTRING(InputLocalEnvironment.File.Name BEFORE '.xml') || '.txt';
+				END IF;
+				--------------------------------------------
+				IF ((outerCntr > 1) AND (Environment.Data[outerCntr].FileFormat <> 'XML')) THEN
+					PROPAGATE TO TERMINAL 'out2';
+					RETURN FALSE;
+				END IF;
+				------------------------------------------------------------------
+
+				PROPAGATE TO TERMINAL 'out1';
+				SET OutputRoot = '';
+				-------------------
+			ELSEIF (NOT CONTAINS(Environment.Data[outerCntr].FilePath,'http')) THEN
+				SET OutputRoot=InputRoot;
+				SET Environment.MailID=Environment.Data.EMAIL_ID;
+				SET Environment.MobileNo=Environment.Data.MOBILE_NO;
+				SET Environment.PCS_Audit.Details.Message.FILE_NAME=InputLocalEnvironment.File.Name;
+				------------------
+				IF (CONTAINS(Environment.Data[outerCntr].PORT_CODE,'6')) THEN
+					SET OutputLocalEnvironment.Destination.File.Remote.ServerDirectory = Environment.Data[outerCntr].FilePath;
+					SET OutputLocalEnvironment.Destination.File.Name = 'CHPOE09_'||Environment.Data[outerCntr].PORT_CODE||'_'||SUBSTRING(InputLocalEnvironment.File.Name AFTER 'CHPOE09_');
+				ELSE
+					SET OutputLocalEnvironment.Destination.File.Remote.ServerDirectory = Environment.Data[outerCntr].FilePath;
+					SET OutputLocalEnvironment.Destination.File.Name = InputLocalEnvironment.File.Name;
+				END IF;
+				PROPAGATE TO TERMINAL 'out2';
+				-- SET OutputRoot = '';
+				ELSEIF(CONTAINS(Environment.Data[outerCntr].FilePath,'http')) THEN
+				SET OutputRoot = NULL;
+				CREATE FIELD OutputRoot.XMLNSC.Data;
+				DECLARE ref REFERENCE TO OutputRoot.XMLNSC.Data;
+				SET ref.cust09 = SUBSTRING(inputXML AFTER '?>');
+				SET ref.URL = Environment.Data[outerCntr].FilePath;
+				SET ref.PortCode = Environment.Data[outerCntr].PORT_CODE;
+				set ref.CommonRef = commonrefno;
+				PROPAGATE TO TERMINAL 'out3';
+			END IF;
+			SET outerCntr = outerCntr + 1;
+		END WHILE;
+		RETURN FALSE;
+	END;
+	CREATE PROCEDURE EDI_CustomsEnhancedGetPath(IN p1 CHARACTER,IN p2 CHARACTER,IN p3 CHARACTER,IN p4 CHARACTER, IN p5 CHARACTER,IN p6 CHARACTER)
+	LANGUAGE DATABASE
+	DYNAMIC RESULT SETS 4
+	EXTERNAL NAME "dbo.EDI_CustomsEnhancedGetPath";
+

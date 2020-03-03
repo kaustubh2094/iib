@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><!-- Copyright 07 Crimsonlogic Pte Ltd; Version : 3.2--><xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:PCS-CMN="PCS_Common_Types">
+	<xsd:import namespace="PCS_Common_Types" schemaLocation="PCS_CommonTypes.xsd"/>
+	<xsd:element name="BerthAllotment" type="BerthAllotmentType"/>
+	<xsd:complexType name="BerthAllotmentType">
+		<xsd:sequence>
+			<xsd:element name="DocumentHeader" type="PCS-CMN:DocumentHeaderType"/>
+			<xsd:element name="DocumentDetails" type="DocumentDetailsTypeBerth"/>
+			<xsd:element name="DocumentSummary" type="PCS-CMN:DocumentSummaryType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="DocumentDetailsTypeBerth">
+		<xsd:sequence>
+			<xsd:element name="BerthAllotmentDetails" type="BerthAllotmentDetailsType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="BerthAllotmentDetailsType">
+		<xsd:sequence>
+			<xsd:element name="RecordType" type="PCS-CMN:RecordType"/>
+			<xsd:element name="VCN" type="PCS-CMN:VCNType"/>
+			<xsd:element name="IMONumber" type="PCS-CMN:CodeIDNameTextType"/>
+			<xsd:element name="CallSign" type="PCS-CMN:CodeIDNameTextType"/>
+			<xsd:element name="VoyageNumber" type="PCS-CMN:CodeIDNameTextType"/>
+			<xsd:element name="SACode" type="PCS-CMN:AgencyType"/>
+			<xsd:element name="LineCode" type="PCS-CMN:AgencyType"/>
+			<xsd:element name="DockORTOCode" type="PCS-CMN:BerthLocationCodeType"/>
+			<xsd:element name="BerthCodes" type="BerthCodesType"/>
+			<xsd:element minOccurs="0" name="Side" type="PCS-CMN:CodeIDNameTextType"/>
+			<xsd:element name="AllotmentDateTime" type="PCS-CMN:DateTimeType"/>
+			<xsd:element minOccurs="0" name="ReasonforChangeofBerth" type="PCS-CMN:ReasonDescType"/>
+			<xsd:element minOccurs="0" name="TentativeorFinal" type="PCS-CMN:TentativeFinal"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="BerthCodesType">
+		<xsd:sequence>
+			<xsd:element maxOccurs="unbounded" minOccurs="1" name="Berthcode" type="PCS-CMN:CodeIDNameTextType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

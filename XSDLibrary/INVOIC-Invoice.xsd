@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2008 Crimsonlogic Pte Ltd; Version: 3.5  -->
+<xsd:schema xmlns:PCS-CMN="PCS_Common_Types" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:import namespace="PCS_Common_Types" schemaLocation="PCS_CommonTypes.xsd"/>
+	<xsd:element name="Invoice" type="InvoiceType"/>
+	<xsd:complexType name="InvoiceType">
+		<xsd:sequence>
+			<xsd:element name="DocumentHeader" type="PCS-CMN:DocumentHeaderType"/>
+			<xsd:element name="DocumentDetails" type="DocumentDetailsTypeInvoic"/>
+			<xsd:element name="DocumentSummary" type="PCS-CMN:DocumentSummaryType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="DocumentDetailsTypeInvoic">
+		<xsd:sequence>
+			<xsd:element name="InvoiceHeader" type="InvoiceHeaderType"/>
+			<xsd:element name="VesselChargesInvoice" type="VesselChargesInvoiceType" minOccurs="0"/>
+			<xsd:element name="ContainerChargesInvoice" type="ContainerChargesInvoiceType" minOccurs="0"/>
+			<xsd:element name="CargoChargesInvoice" type="CargoChargesInvoiceType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="InvoiceHeaderType">
+		<xsd:sequence>
+			<xsd:element name="RecordType" type="PCS-CMN:RecordType"/>
+			<xsd:element name="InvoiceType" type="PCS-CMN:Char1CodeType"/>
+			<xsd:element name="BillNumber" type="PCS-CMN:BillNumber"/>
+			<xsd:element name="BillDate" type="PCS-CMN:DateType"/>
+			<xsd:element name="PartyCodeDatails" type="PartyCodeDetailsType" minOccurs="0"/>
+			<xsd:element name="BillToPartyCodeQualifier" type="PCS-CMN:Char3CodeType" minOccurs="0"/>
+			<xsd:element name="BillablePartyCode" type="PCS-CMN:BerthLocationCodeType" minOccurs="0"/>
+			<xsd:element name="BillablePartyName" type="PCS-CMN:NameType" minOccurs="0"/>
+			<xsd:element name="PDAccountNo" type="PCS-CMN:PDAccNumType" minOccurs="0"/>
+			<xsd:element name="CurrencyCode" type="PCS-CMN:IMDGNumberType" minOccurs="0"/>
+			<xsd:element name="DockOrTOCode" type="PCS-CMN:BerthType" minOccurs="0"/>
+			<xsd:element name="GrossTotal" type="PCS-CMN:StampDutyPaidType"/>
+			<xsd:element name="Remission" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="GrossValueOfServices" type="PCS-CMN:BOLStampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="ServiceTax" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="EducationCess" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="HigherEducationCess" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="Rebate" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="OtherTaxes1" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="OtherTaxes2" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="TotalPayable" type="PCS-CMN:StampDutyPaidType"/>
+			<xsd:element name="BillDetails" type="InvoiceBillDetailsType" minOccurs="0"/>
+			<xsd:element name="TotalAdvanceAmountPaid" type="PCS-CMN:BOLStampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="TotalTDSDone" type="PCS-CMN:BOLStampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="TDSPercentage" type="PCS-CMN:ExpectedDraftType" minOccurs="0"/>
+			<xsd:element name="ApplicableTDS" type="PCS-CMN:FreeBoardType" minOccurs="0"/>
+			<xsd:element name="NetAmountPayable" type="PCS-CMN:NetBalance"/>
+			<xsd:element name="ServiceTaxRegistrationNo" type="PCS-CMN:PDAccNumType"/>
+			<xsd:element name="PortBankAccountNo" type="PCS-CMN:RSDNumberType" minOccurs="0"/>
+			<xsd:element name="ServiceCategory" type="PCS-CMN:Char1CodeType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="PartyCodeDetailsType">
+		<xsd:sequence>
+			<xsd:element name="PartyCodes" type="PartyCodeType" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="PartyCodeType">
+		<xsd:sequence>
+			<xsd:element name="RecordNumber" type="PCS-CMN:RecordNumberType" minOccurs="0"/>
+			<xsd:element name="PartyCodeQualifier" type="PCS-CMN:Char3CodeType" minOccurs="0"/>
+			<xsd:element name="PartyCode" type="PCS-CMN:BerthLocationCodeType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="InvoiceBillDetailsType">
+		<xsd:sequence>
+			<xsd:element name="Bill" type="BillType" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="BillType">
+		<xsd:sequence>
+			<xsd:element name="RecordNumber" type="PCS-CMN:RecordNumberType" minOccurs="0"/>
+			<xsd:element name="SpecialRate" type="PCS-CMN:ValueType" minOccurs="0"/>
+			<xsd:element name="DepositOrBillFlag" type="PCS-CMN:Char1CodeType" minOccurs="0"/>
+			<xsd:element name="AdvBillNumber" type="PCS-CMN:BillNumber" minOccurs="0"/>
+			<xsd:element name="AdvBillDate" type="PCS-CMN:DateType" minOccurs="0"/>
+			<xsd:element name="AdvBilAmountPaid" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="TDSDedByParty" type="PCS-CMN:BOLStampDutyPaidType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="VesselChargesInvoiceType">
+		<xsd:sequence>
+			<xsd:element name="VesselService" type="VesselChargesType" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="VesselChargesType">
+		<xsd:sequence>
+			<xsd:element name="RecordType" type="PCS-CMN:RecordType" minOccurs="0"/>
+			<xsd:element name="RecordNumber" type="PCS-CMN:RecordNumberType" minOccurs="0"/>
+			<xsd:element name="VCN" type="PCS-CMN:VCNType" minOccurs="0"/>
+			<xsd:element name="ExchangeRate" type="PCS-CMN:ExchangeRateType" minOccurs="0"/>
+			<xsd:element name="ExchangeDate" type="PCS-CMN:DateType" minOccurs="0"/>
+			<xsd:element name="ServiceCategory" type="PCS-CMN:Char2CodeType" minOccurs="0"/>
+			<xsd:element name="ServiceType" type="PCS-CMN:Char2CodeType" minOccurs="0"/>
+			<xsd:element name="SubServiceType" type="PCS-CMN:Char3CodeType" minOccurs="0"/>
+			<xsd:element name="VesselArrivalDate" type="PCS-CMN:DateType" minOccurs="0"/>
+			<xsd:element name="VesselBerthingDate" type="PCS-CMN:DateType" minOccurs="0"/>
+			<xsd:element name="VesselUnberthingDate" type="PCS-CMN:DateType" minOccurs="0"/>
+			<xsd:element name="VesselReadinessToSail" type="PCS-CMN:DateType" minOccurs="0"/>
+			<xsd:element name="VesselSailingDate" type="PCS-CMN:DateType" minOccurs="0"/>
+			<xsd:element name="OpeartionType" type="PCS-CMN:Char1CodeType" minOccurs="0"/>
+			<xsd:element name="Rate" type="PCS-CMN:RateType" minOccurs="0"/>
+			<xsd:element name="Quantity1" type="PCS-CMN:QuantityType" minOccurs="0"/>
+			<xsd:element name="UnitOfMeasurementForQ1" type="PCS-CMN:Char3CodeType" minOccurs="0"/>
+			<xsd:element name="Quantity2" type="PCS-CMN:QuantityType" minOccurs="0"/>
+			<xsd:element name="UnitOfMeasurementForQ2" type="PCS-CMN:Char3CodeType" minOccurs="0"/>
+			<xsd:element name="TotalChargesForServices" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="ServiceTax" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="EducationCess" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="HigherEducationCess" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="OtherTaxes" type="PCS-CMN:BOLStampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="ServiceValue" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="BalAmtPayable" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ContainerChargesInvoiceType">
+		<xsd:sequence>
+			<xsd:element name="ContainerService" type="ContainerChargesType" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ContainerChargesType">
+		<xsd:sequence>
+			<xsd:element name="RecordType" type="PCS-CMN:RecordType" minOccurs="0"/>
+			<xsd:element name="RecordNumber" type="PCS-CMN:RecordNumberType" minOccurs="0"/>
+			<xsd:element name="InvoiceType" type="PCS-CMN:Char1CodeType" minOccurs="0"/>
+			<xsd:element name="VCN" type="PCS-CMN:VCNType" minOccurs="0"/>
+			<xsd:element name="ContainersDetails" type="ContainersDetailsType" minOccurs="0"/>
+			<xsd:element name="ServiceTax" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="EducationCess" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="HigherEducationCess" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="OtherTaxes" type="PCS-CMN:BOLStampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="ServiceValue" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ContainersDetailsType">
+		<xsd:sequence>
+			<xsd:element name="Container" type="ContainersType" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ContainersType">
+		<xsd:sequence>
+			<xsd:element name="RecordNumber" type="PCS-CMN:RecordNumberType" minOccurs="0"/>
+			<xsd:element name="ContainerNumber" type="PCS-CMN:ContainerNumberType" minOccurs="0"/>
+			<xsd:element name="ISOCode" type="PCS-CMN:ISOCodeType" minOccurs="0"/>
+			<xsd:element name="ContainerType" type="PCS-CMN:Char2CodeType" minOccurs="0"/>
+			<xsd:element name="FullOrEmptyIndicator" type="PCS-CMN:Char1CodeType" minOccurs="0"/>
+			<xsd:element name="ContainerStatus" type="PCS-CMN:ContainerStatusType" minOccurs="0"/>
+			<xsd:element name="Category" type="PCS-CMN:Char1CodeType" minOccurs="0"/>
+			<xsd:element name="EntryDateNTime" type="PCS-CMN:DateTimeType" minOccurs="0"/>
+			<xsd:element name="EntryMode" type="PCS-CMN:Char1CodeType" minOccurs="0"/>
+			<xsd:element name="ExitDateNTime" type="PCS-CMN:DateTimeType" minOccurs="0"/>
+			<xsd:element name="ExitMode" type="PCS-CMN:Char1CodeType" minOccurs="0"/>
+			<xsd:element name="ServiceCategory" type="PCS-CMN:Char2CodeType" minOccurs="0"/>
+			<xsd:element name="ServiceType" type="PCS-CMN:Char2CodeType" minOccurs="0"/>
+			<xsd:element name="SubServiceType" type="PCS-CMN:Char3CodeType" minOccurs="0"/>
+			<xsd:element name="ExchangeRate" type="PCS-CMN:ExchangeRateType" minOccurs="0"/>
+			<xsd:element name="ExchangeDate" type="PCS-CMN:DateType" minOccurs="0"/>
+			<xsd:element name="Rate" type="PCS-CMN:RateType" minOccurs="0"/>
+			<xsd:element name="Quantity1" type="PCS-CMN:NoOfPackagesType" minOccurs="0"/>
+			<xsd:element name="UOM1" type="PCS-CMN:Char3CodeType" minOccurs="0"/>
+			<xsd:element name="Quantity2" type="PCS-CMN:NoOfPackagesType" minOccurs="0"/>
+			<xsd:element name="UOM2" type="PCS-CMN:Char3CodeType" minOccurs="0"/>
+			<xsd:element name="TotalCharges" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="Rebate" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="Amount" type="PCS-CMN:BOLStampDutyPaidType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="CargoChargesInvoiceType">
+		<xsd:sequence>
+			<xsd:element name="CargoService" type="CargoChargesType" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="CargoChargesType">
+		<xsd:sequence>
+			<xsd:element name="RecordType" type="PCS-CMN:RecordType" minOccurs="0"/>
+			<xsd:element name="RecordNumber" type="PCS-CMN:RecordNumberType" minOccurs="0"/>
+			<xsd:element name="ImportExportFlag" type="PCS-CMN:Char1CodeType" minOccurs="0"/>
+			<xsd:element name="ContainerisedOrNonContainerisedCargo" type="PCS-CMN:Char1CodeType" minOccurs="0"/>
+			<xsd:element name="ServiceCategory" type="PCS-CMN:Char1CodeType" minOccurs="0"/>
+			<xsd:element name="ServiceType" type="PCS-CMN:Char2CodeType" minOccurs="0"/>
+			<xsd:element name="SubServiceType" type="PCS-CMN:Char2CodeType" minOccurs="0"/>
+			<xsd:element name="VCN" type="PCS-CMN:VCNType" minOccurs="0"/>
+			<xsd:element name="IGMNumber" type="PCS-CMN:ShippingBillNumberType" minOccurs="0"/>
+			<xsd:element name="ExchangeRate" type="PCS-CMN:ExchangeRateType" minOccurs="0"/>
+			<xsd:element name="ExchangeDate" type="PCS-CMN:DateType" minOccurs="0"/>
+			<xsd:element name="GeneralLandinDate" type="PCS-CMN:DateType" minOccurs="0"/>
+			<xsd:element name="CargoDespatchDate" type="PCS-CMN:DateType" minOccurs="0"/>
+			<xsd:element name="VesselComplitionDate" type="PCS-CMN:DateType" minOccurs="0"/>
+			<xsd:element name="LastFreeDate" type="PCS-CMN:DateType" minOccurs="0"/>
+			<xsd:element name="RotationNo" type="PCS-CMN:ShippingBillNumberType" minOccurs="0"/>
+			<xsd:element name="IGMLineNumber" type="PCS-CMN:CustomSubLineNumberType" minOccurs="0"/>
+			<xsd:element name="IGMSubLineNumber" type="PCS-CMN:CustomSubLineNumberType" minOccurs="0"/>
+			<xsd:element name="Trade" type="PCS-CMN:Char1CodeType" minOccurs="0"/>
+			<xsd:element name="CommodityCode" type="PCS-CMN:CodeIDNameTextType" minOccurs="0"/>
+			<xsd:element name="CommodityDescription" type="PCS-CMN:DescType" minOccurs="0"/>
+			<xsd:element name="Quantity1" type="PCS-CMN:QuantityType" minOccurs="0"/>
+			<xsd:element name="UnitOfMeasurement1" type="PCS-CMN:Char3CodeType" minOccurs="0"/>
+			<xsd:element name="Quantity2" type="PCS-CMN:QuantityType" minOccurs="0"/>
+			<xsd:element name="UnitOfMeasurement2" type="PCS-CMN:Char3CodeType" minOccurs="0"/>
+			<xsd:element name="CIFOrFIBValue" type="PCS-CMN:QuantityType" minOccurs="0"/>
+			<xsd:element name="NoOfPackages" type="PCS-CMN:RecordNumberType" minOccurs="0"/>
+			<xsd:element name="WharfageEntryNumber" type="PCS-CMN:BillNumberType" minOccurs="0"/>
+			<xsd:element name="Rate" type="PCS-CMN:RateType" minOccurs="0"/>
+			<xsd:element name="TotalCharges" type="PCS-CMN:TotalChargesType" minOccurs="0"/>
+			<xsd:element name="Rebate" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="ServiceTax" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="EducationCess" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="HigherEducationCess" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="OtherTaxes" type="PCS-CMN:BOLStampDutyPaidType" minOccurs="0"/>
+			<xsd:element name="ServiceValue" type="PCS-CMN:StampDutyPaidType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>
