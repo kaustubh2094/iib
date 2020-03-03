@@ -446,3 +446,83 @@ java.util.ConcurrentModificationException
 	at org.eclipse.equinox.launcher.Main.basicRun(Main.java:603)
 	at org.eclipse.equinox.launcher.Main.run(Main.java:1465)
 	at org.eclipse.equinox.launcher.Main.main(Main.java:1438)
+!SESSION 2020-03-03 10:33:28.844 -----------------------------------------------
+eclipse.buildId=4.4.2.M20150204-1700
+java.fullversion=8.0.5.35 - pwa6480sr5fp35ifix-20190524_01(SR5 FP35+IJ15979)
+JRE 1.8.0 Windows 10 amd64-64-Bit Compressed References 20190524_417294 (JIT enabled, AOT enabled)
+OpenJ9   - 321e430
+OMR      - 16b77d7
+IBM      - 72459d3
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=en_US
+Framework arguments:  -showlocation -product com.ibm.etools.msgbroker.tooling.ide tools_auto -showlocation -product com.ibm.etools.msgbroker.tooling.ide
+Command-line arguments:  -os win32 -ws win32 -arch x86_64 -showlocation -product com.ibm.etools.msgbroker.tooling.ide tools_auto -showlocation -product com.ibm.etools.msgbroker.tooling.ide
+
+!ENTRY org.eclipse.emf.ecore 2 0 2020-03-03 10:33:38.103
+!MESSAGE Both 'com.ibm.etools.javaee.core' and 'com.ibm.etools.mft.service.model' register an extension parser for 'application'
+
+!ENTRY org.eclipse.ui 2 2 2020-03-03 10:33:52.765
+!MESSAGE Invalid preference category path: com.ibm.importer.preferences (bundle: com.ibm.adapter.c, page: com.ibm.adapter.c.ui.preferencepage.CPreferencePage)
+
+!ENTRY org.eclipse.ui 2 2 2020-03-03 10:33:52.798
+!MESSAGE Invalid preference category path: com.ibm.debug.breakpoints.common.pref.tracepoint (bundle: com.ibm.debug.wsa, page: com.ibm.debug.wsa.WSATracepointPreferencePage)
+
+!ENTRY org.eclipse.ui 2 2 2020-03-03 10:33:52.800
+!MESSAGE Invalid preference category path: com.ibm.importer.preferences (bundle: com.ibm.etools.cobol.preference.ui, page: com.ibm.etools.cobol.preference.ui.preferencepage.CobolPreferencePage)
+
+!ENTRY com.ibm.etools.mft.uri 0 0 2020-03-03 10:33:53.917
+!MESSAGE 
+
+!ENTRY com.ibm.mq.runtime 1 0 2020-03-03 10:35:11.467
+!MESSAGE 
+
+!ENTRY com.ibm.mq.runtime 1 0 2020-03-03 10:35:11.467
+!MESSAGE C:\Program Files\IBM\IIB\10.0.0.18\tools>mqsifindmqpath
+
+!ENTRY com.ibm.mq.runtime 1 0 2020-03-03 10:35:11.799
+!MESSAGE BIP8071I: Successful command completion. C:\Program Files\MQ
+
+!ENTRY com.ibm.mq.runtime 1 0 2020-03-03 10:35:11.799
+!MESSAGE MQ Install location found:C:/Program Files/MQ
+
+!ENTRY com.ibm.mq.runtime 1 0 2020-03-03 10:35:11.799
+!MESSAGE 
+!SESSION 2020-03-03 11:30:17.089 -----------------------------------------------
+eclipse.buildId=4.4.2.M20150204-1700
+java.fullversion=8.0.5.35 - pwa6480sr5fp35ifix-20190524_01(SR5 FP35+IJ15979)
+JRE 1.8.0 Windows 10 amd64-64-Bit Compressed References 20190524_417294 (JIT enabled, AOT enabled)
+OpenJ9   - 321e430
+OMR      - 16b77d7
+IBM      - 72459d3
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=en_US
+Framework arguments:  -showlocation -product com.ibm.etools.msgbroker.tooling.ide tools_auto -showlocation -product com.ibm.etools.msgbroker.tooling.ide
+Command-line arguments:  -data C:\Users\kaustubhs\Desktop\Gittry\iib -os win32 -ws win32 -arch x86_64 -showlocation -product com.ibm.etools.msgbroker.tooling.ide tools_auto -showlocation -product com.ibm.etools.msgbroker.tooling.ide
+
+!ENTRY org.eclipse.emf.ecore 2 0 2020-03-03 11:30:19.030
+!MESSAGE Both 'com.ibm.etools.javaee.core' and 'com.ibm.etools.mft.service.model' register an extension parser for 'application'
+
+!ENTRY org.eclipse.ui 2 2 2020-03-03 11:30:21.071
+!MESSAGE Invalid preference category path: com.ibm.importer.preferences (bundle: com.ibm.adapter.c, page: com.ibm.adapter.c.ui.preferencepage.CPreferencePage)
+
+!ENTRY org.eclipse.ui 2 2 2020-03-03 11:30:21.074
+!MESSAGE Invalid preference category path: com.ibm.debug.breakpoints.common.pref.tracepoint (bundle: com.ibm.debug.wsa, page: com.ibm.debug.wsa.WSATracepointPreferencePage)
+
+!ENTRY org.eclipse.ui 2 2 2020-03-03 11:30:21.074
+!MESSAGE Invalid preference category path: com.ibm.importer.preferences (bundle: com.ibm.etools.cobol.preference.ui, page: com.ibm.etools.cobol.preference.ui.preferencepage.CobolPreferencePage)
+
+!ENTRY com.ibm.etools.mft.uri 0 0 2020-03-03 11:30:21.345
+!MESSAGE 
+
+!ENTRY com.ibm.mq.runtime 1 0 2020-03-03 11:30:26.916
+!MESSAGE 
+
+!ENTRY com.ibm.mq.runtime 1 0 2020-03-03 11:30:26.916
+!MESSAGE C:\Program Files\IBM\IIB\10.0.0.18\tools>mqsifindmqpath
+
+!ENTRY com.ibm.mq.runtime 1 0 2020-03-03 11:30:27.222
+!MESSAGE BIP8071I: Successful command completion. C:\Program Files\MQ
+
+!ENTRY com.ibm.mq.runtime 1 0 2020-03-03 11:30:27.223
+!MESSAGE MQ Install location found:C:/Program Files/MQ
+
+!ENTRY com.ibm.mq.runtime 1 0 2020-03-03 11:30:27.223
+!MESSAGE 
